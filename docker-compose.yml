@@ -4,8 +4,8 @@ services:
     image: postgres:14.21-alpine
     shm_size: 128mb
     restart: always
-    # ports: # закрываем порт от вшенего
-    #   - 5444:5432 # на хосте 5444
+    ports: # закрываем порт от вшенего
+      - 5432:5432 # на хосте 5432
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
