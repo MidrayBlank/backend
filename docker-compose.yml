@@ -1,11 +1,11 @@
 services:
-  db:
+  test_db:
     container_name: postgres
     image: postgres:14.21-alpine
     shm_size: 128mb
     restart: always
-    ports: # закрываем порт от вшенего
-      - 5432:5432 # на хосте 5432
+    ports:
+      - 5432:5432
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
@@ -19,28 +19,29 @@ services:
       retries: 30
       start_period: 10s
 
-  # backend:
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   container_name: backend
-  #   build:
-  #     context: ./authentical
-  #   # ports: # закрываем порт от вшенего
-  #   #   - 8080:8080
-  #   restart: always
-  #   environment:
-  #     - SERVER_PORT=${SERVER_PORT}
-  #     - DATABASE_HOST=${DATABASE_HOST}
-  #     - DATABASE_PORT=${DATABASE_PORT}
-  #     - DATABASE_USER=${DATABASE_USER}
-  #     - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-  #     - DATABASE_DBNAME=${DATABASE_DBNAME}
-  #   healthcheck:
-  #     test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:8080']
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  test_backend:
+    depends_on:
+      test_db:
+        condition: service_healthy
+    container_name: backend
+    build:
+      context: .
+    ports:
+      - 8080:${SERVER_PORT}
+    restart: always
+    environment:
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_DBNAME=${DATABASE_DBNAME}
+      - SERVER_PORT=${SERVER_PORT}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+    healthcheck:
+      test:
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:${SERVER_PORT}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
