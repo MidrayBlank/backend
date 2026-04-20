@@ -45,10 +45,10 @@ else
     exit
 fi
 
-DATABASE_USER=$(grep -E "DATABASE_USER" ../.env | grep -Eo "[^=]+$")
-DATABASE_PASSWORD=$(grep -E "DATABASE_PASSWORD" ../.env | grep -Eo "[^=]+$")
-DATABASE_DBNAME=$(grep -E "DATABASE_DBNAME" ../.env | grep -Eo "[^=]+$")
-DATABASE_HOST=$(grep -E "DATABASE_HOST" ../.env | grep -Eo "[^=]+$")
-DATABASE_PORT=$(grep -E "DATABASE_PORT" ../.env | grep -Eo "[^=]+$")
+DATABASE_USER=$(grep -E "DATABASE_USER" .env | grep -Eo "[^=]+$")
+DATABASE_PASSWORD=$(grep -E "DATABASE_PASSWORD" .env | grep -Eo "[^=]+$")
+DATABASE_DBNAME=$(grep -E "DATABASE_DBNAME" .env | grep -Eo "[^=]+$")
+DATABASE_HOST=$(grep -E "DATABASE_HOST" .env | grep -Eo "[^=]+$")
+DATABASE_PORT=$(grep -E "DATABASE_PORT" .env | grep -Eo "[^=]+$")
 
-goose -dir db/migrations postgres "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@DATABASE_HOST:DATABASE_PORT/$DATABASE_DBNAME?sslmode=disable" "$action" $action_arg
+goose -dir db/migrations postgres "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@$DATABASE_HOST:$DATABASE_PORT/$DATABASE_DBNAME?sslmode=disable" "$action" $action_arg
