@@ -1,5 +1,26 @@
 -- +goose Up
-SELECT 'up SQL query';
+CREATE SCHEMA IF NOT EXISTS midray;
+
+CREATE TABLE IF NOT EXISTS midray.rosstat (
+    id                  SERIAL      PRIMARY KEY,
+    code                INTEGER     NOT NULL,
+    year                INTEGER     NOT NULL,
+    population_amout    INTEGER     NOT NULL,
+    birth_amount        INTEGER     NULL,
+    death_amount        INTEGER     NULL,
+    arrival_amount      INTEGER     NULL,
+    departure_amount    INTEGER     NULL,
+    male_amount         INTEGER     NULL,
+    female_amount       INTEGER     NULL,
+    UNIQUE(code, year)
+);
+
+ALTER TABLE         midray.rosstat 
+ADD CONSTRAINT      fk_rosstat_geo 
+FOREIGN KEY         (code) 
+REFERENCES          midray.geo(code) 
+ON DELETE CASCADE;
 
 -- +goose Down
-SELECT 'down SQL query';
+ALTER TABLE             midray.rosstat  DROP CONSTRAINT IF EXISTS fk_rosstat_geo;
+DROP TABLE IF EXISTS    midray.rosstat;
