@@ -51,4 +51,4 @@ DATABASE_DBNAME=$(grep -E "DATABASE_DBNAME" .env | grep -Eo "[^=]+$")
 DATABASE_HOST=$(grep -E "DATABASE_HOST" .env | grep -Eo "[^=]+$")
 DATABASE_PORT=$(grep -E "DATABASE_PORT" .env | grep -Eo "[^=]+$")
 
-goose -dir db/migrations postgres "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@$DATABASE_HOST:$DATABASE_PORT/$DATABASE_DBNAME?sslmode=disable" "$action" $action_arg
+goose -dir migrations postgres "postgresql://$DATABASE_USER:$DATABASE_PASSWORD@$DATABASE_HOST:$DATABASE_PORT/$DATABASE_DBNAME?sslmode=disable" "$action" $action_arg
