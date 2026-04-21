@@ -18,7 +18,7 @@ sh scripts/migrations.sh --status
 
 # Создать новую миграцию
 sh scripts/migrations.sh --new <название_миграции>
-
+ 
 # Накатить все миграции
 sh scripts/migrations.sh --up
 
