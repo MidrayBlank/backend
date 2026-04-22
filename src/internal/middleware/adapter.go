@@ -17,9 +17,11 @@ func processServiceArgument(
 	serviceProvider *provider.ServiceProvider,
 ) (reflect.Value, error) {
 	service, err := serviceProvider.Get(argType)
+
 	if err != nil {
 		return reflect.Value{}, fmt.Errorf("service not found: %s", argType)
 	}
+
 	return reflect.ValueOf(service), nil
 }
 
@@ -31,7 +33,7 @@ func processParamsArgument(
 	dtoVal := reflect.New(argType).Interface()
 
 	if err := fiberCtx.Bind().All(dtoVal); err != nil {
-		return reflect.Value{}, fmt.Errorf("failed to bind parameters: %w", err)
+		return reflect.Value{}, ParamsValidationError{err: err}
 	}
 
 	return reflect.ValueOf(dtoVal).Elem(), nil
@@ -43,9 +45,11 @@ func processDTOArgument(
 	_ *provider.ServiceProvider,
 ) (reflect.Value, error) {
 	dtoPtr := reflect.New(argType.Elem()).Interface()
+
 	if err := fiberCtx.Bind().Body(dtoPtr); err != nil {
-		return reflect.Value{}, fmt.Errorf("invalid request body: %s", err.Error())
+		return reflect.Value{}, BodyValidationError{err: err}
 	}
+
 	return reflect.ValueOf(dtoPtr), nil
 }
 
@@ -112,6 +116,14 @@ func getArguments(funcType reflect.Type, fiberCtx fiber.Ctx, serviceProvider *pr
 	return args, nil
 }
 
+func wrapError(errArg any, fiberCtx fiber.Ctx) error {
+	err := errArg.(error)
+	if sc, ok := err.(interface{ StatusCode() int }); ok {
+		return fiberCtx.Status(sc.StatusCode()).JSON(fiber.Map{"error": err.Error()})
+	}
+	return fiberCtx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+}
+
 func Adapt(handlerFunc interface{}, serviceProvider *provider.ServiceProvider) fiber.Handler {
 	funcValue := reflect.ValueOf(handlerFunc)
 	funcType := funcValue.Type()
@@ -122,7 +134,7 @@ func Adapt(handlerFunc interface{}, serviceProvider *provider.ServiceProvider) f
 		args, err := getArguments(funcType, fiberCtx, serviceProvider)
 
 		if err != nil {
-			return fiberCtx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+			return wrapError(err, fiberCtx)
 		}
 
 		results := funcValue.Call(args)
@@ -131,11 +143,7 @@ func Adapt(handlerFunc interface{}, serviceProvider *provider.ServiceProvider) f
 		errVal := results[1].Interface()
 
 		if errVal != nil {
-			err := errVal.(error)
-			if sc, ok := err.(interface{ StatusCode() int }); ok {
-				return fiberCtx.Status(sc.StatusCode()).JSON(fiber.Map{"error": err.Error()})
-			}
-			return fiberCtx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+			return wrapError(err, fiberCtx)
 		}
 
 		if data == nil {

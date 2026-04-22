@@ -6,8 +6,8 @@ import (
 	service "backend/src/internal/service/abstract"
 )
 
-func RosstatRawHandler(ctx context.HandlerContext, params dto.RosstatParams, rawService service.IRawService) (dto.RosstatResponse, error) {
-	populationList := rawService.GetRosstatRawByCodes(params.Codes)
+func RosstatHandler(ctx context.HandlerContext, params dto.RosstatParams, rosstatService service.IRosstatService) (dto.RosstatResponse, error) {
+	populationList := rosstatService.GetRosstatByCodes(params.Codes)
 
 	for _, field := range params.Fields {
 		if field == "population" {

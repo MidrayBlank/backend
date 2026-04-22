@@ -2,7 +2,7 @@ package dto
 
 type RosstatParams struct {
 	Codes  []int    `query:"codes"`
-	Fields []string `query:"fields"`
+	Fields []string `query:"fields" validate:"required,min=1"`
 }
 
 type RosstatGeo struct {

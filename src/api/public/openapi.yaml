@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  title: API сервиса Midray (ТЕСТ)
+  description: API сервиса Midray (ТЕСТ).
+  version: 1.0.0
+paths:
+  /api/v1/rosstat:
+    get:
+      summary: Получение данных Росстата (ТЕСТ)
+      parameters:
+        - name: fields
+          in: query
+          required: true
+          description: Показатели для выгрузки.
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          example: ["population", "birth", "death"]
+        - name: codes
+          in: query
+          required: false
+          description: |
+            Коды муниципалитетов и субъектов РФ.
+            Если параметр не указан, выгружаются общие данные по России.
+          schema:
+            type: array
+            items:
+              type: integer
+          style: form
+          explode: true
+          example: [1, 2, 3]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Отсутствует обязательный параметр

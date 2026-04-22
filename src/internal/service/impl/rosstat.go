@@ -4,10 +4,10 @@ import (
 	"backend/src/internal/domain"
 )
 
-type RawService struct {
+type RosstatService struct {
 }
 
-func (service *RawService) GetRosstatRawByCodes(codes []int) domain.RosstatList {
+func (service *RosstatService) GetRosstatByCodes(codes []int) domain.RosstatList {
 	// TODO: connect to Repository and return real values
 	// Mock just for tests
 	result := make(domain.RosstatList, len(codes))
