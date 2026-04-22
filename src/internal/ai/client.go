@@ -32,7 +32,7 @@ func (c *OpenRouterClient) ChatCompletion(model string, messages []Message) (*Ch
 		Model:       model,
 		Messages:    messages,
 		Stream:      false, // Получаем ответ одним соо, если true -> то по словам получаем ответ
-		Temperature: 0.1,   // Уровень креативности(для нас лучше использовать мб >1.2)
+		Temperature: 0.7,   // Уровень креативности
 		MaxTokens:   1000,
 	}
 
@@ -46,7 +46,7 @@ func (c *OpenRouterClient) sendRequest(reqBody ChatRequest) (*ChatResponse, erro
 		return nil, fmt.Errorf("ошибка маршалинга запроса: %w", err)
 	}
 
-	// Отправляем запрос; bytes.NewBuffer(jsonData) -> Позволяет работать с данными как с io.Reader или io.Writer
+	// Отправление запроса; bytes.NewBuffer(jsonData) -> Позволяет работать с данными как с io.Reader или io.Writer
 	req, err := http.NewRequest("POST", c.baseURL+"/chat/completions", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("ошибка создания запроса: %w", err)
@@ -54,6 +54,7 @@ func (c *OpenRouterClient) sendRequest(reqBody ChatRequest) (*ChatResponse, erro
 
 	c.setHeaders(req)
 
+	// Выполнение запроса через метод у http.Client
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка выполнения запроса: %w", err)
@@ -65,6 +66,7 @@ func (c *OpenRouterClient) sendRequest(reqBody ChatRequest) (*ChatResponse, erro
 		return nil, fmt.Errorf("API вернул ошибку %d: %s", resp.StatusCode, string(body))
 	}
 
+	// Переводим формат json в объект ChatResponse
 	var chatResp ChatResponse
 	if err = json.NewDecoder(resp.Body).Decode(&chatResp); err != nil {
 		return nil, fmt.Errorf("ошибка декодирования ответа: %w", err)
@@ -80,6 +82,6 @@ func (c *OpenRouterClient) setHeaders(req *http.Request) {
 
 	// Опционально(для статистики на openrouter):
 	req.Header.Set("HTTP-Referer", "http://localhost:8080") // Наш сайт
-	req.Header.Set("X-Title", "Go OpenRouter Client")       // Название нашего сервиса
+	req.Header.Set("X-Title", "Midray")                     // Название нашего сервиса
 
 }
