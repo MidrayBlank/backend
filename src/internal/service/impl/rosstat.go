@@ -1,10 +1,16 @@
 package impl
 
 import (
+	"backend/src/internal/db/abstract"
 	"backend/src/internal/domain"
 )
 
 type RosstatService struct {
+	conn abstract.IDBConnection
+}
+
+func NewRosstatService(conn abstract.IDBConnection) *RosstatService {
+	return &RosstatService{conn: conn}
 }
 
 func (service *RosstatService) GetRosstatByCodes(codes []int) domain.RosstatList {

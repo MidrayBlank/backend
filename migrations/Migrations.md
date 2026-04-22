@@ -33,25 +33,6 @@ sh scripts/migrations.sh --down <версия>
 
 ```
 
-### Структура базы данных
-
-Все таблицы находятся в схеме `midray`:
-
-| Таблица | Описание |
-|---------|----------|
-| `midray.geo` | Муниципальные районы (иерархия) |
-| `midray.rosstat` | Основная демографическая статистика |
-| `midray.rosstat_age` | Возрастная структура населения |
-
-### Структура миграция
-
-``` text
-migrations/
-├── 001_create_geo_table.sql
-├── 002_create_rosstat_table.sql
-└── 003_create_rosstat_age_table.sql
-```
-
 ### Запуск миграция
 
 ``` bash
