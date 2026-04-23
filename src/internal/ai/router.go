@@ -1,8 +1,10 @@
 package ai
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type AIOpenRouter struct {
@@ -11,15 +13,24 @@ type AIOpenRouter struct {
 }
 
 // NewAIRouter создает объект AIRouter, создавая сначала объект OpenRouterClient
-func NewAIRouter(apiKey, model, baseURL string) *AIRouter {
-	return &AIRouter{
+func NewAIOpenRouter(apiKey, model, baseURL string) *AIOpenRouter {
+	return &AIOpenRouter{
 		client: NewOpenRouterClient(apiKey, baseURL),
 		model:  model,
 	}
 }
 
+func (r *AIOpenRouter) UseApiKey(apiKey string) error {
+	if strings.EqualFold(r.client.apiKey, apiKey) {
+		return errors.New("этот API ключ уже стоит, нечего менять")
+	}
+
+	r.client.apiKey = apiKey
+	return nil
+}
+
 // SendRequest создает запрос из полученной строки, затем обращается к OpenRouterClient для обработки и получения результата
-func (r *AIRouter) SendRequest(requstData string) (string, error) {
+func (r *AIOpenRouter) SendRequest(requstData string) (string, error) {
 	// Создаем стуктуру запросов к LLM
 	message := []Message{
 		{
