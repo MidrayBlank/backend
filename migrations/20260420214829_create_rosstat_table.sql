@@ -2,16 +2,23 @@
 CREATE SCHEMA IF NOT EXISTS midray;
 
 CREATE TABLE IF NOT EXISTS midray.rosstat (
-    id                  SERIAL      PRIMARY KEY,
-    code                INTEGER     NOT NULL,
-    year                INTEGER     NOT NULL,
-    population_amout    INTEGER     NOT NULL,
-    birth_amount        INTEGER     NULL,
-    death_amount        INTEGER     NULL,
-    arrival_amount      INTEGER     NULL,
-    departure_amount    INTEGER     NULL,
-    male_amount         INTEGER     NULL,
-    female_amount       INTEGER     NULL,
+    id                      SERIAL          PRIMARY KEY,
+    code                    TEXT            NOT NULL,
+    year                    INTEGER         NOT NULL,
+
+    population_amout        INTEGER         NOT NULL,
+    birth_amount            INTEGER         NULL,
+    death_amount            INTEGER         NULL,
+    arrival_amount          INTEGER         NULL,
+    departure_amount        INTEGER         NULL,
+    male_amount             INTEGER         NULL,
+    female_amount           INTEGER         NULL,
+
+    land_area               DECIMAL(10,2)   NULL,  
+    avg_salary              DECIMAL(10,2)   NULL,     
+    medical_facilities      INTEGER         NULL,  
+    schools_count           INTEGER         NULL,       
+    housing_commissioned    DECIMAL(10,2)   NULL,
     UNIQUE(code, year)
 );
 
