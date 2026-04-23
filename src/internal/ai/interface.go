@@ -1,6 +1,6 @@
 package ai
 
-type IAIRouter interface {
+type IAIOpenRouter interface {
 	// SendReques отправляет запрос в LLM по номеру вопроса
-	SendRequest(inputData string) (string, error)
+	SendRequest(requstData string) (string, error)
 }

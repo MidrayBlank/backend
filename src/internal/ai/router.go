@@ -5,9 +5,7 @@ import (
 	"os"
 )
 
-type QuestionNumber int
-
-type AIRouter struct {
+type AIOpenRouter struct {
 	client *OpenRouterClient
 	model  string
 }
