@@ -2,7 +2,6 @@ package impl
 
 import (
 	"backend/src/internal/model"
-	"context"
 	"errors"
 
 	"gorm.io/gorm"
@@ -19,27 +18,23 @@ func NewAIAPIRepository(newDB *gorm.DB) *AIAPIRepository {
 	}
 }
 
-// Upsert создает новый счетчик, если с таким hash его еще нет -> если есть, то счетчик увеличивается на 1
-func (r *AIAPIRepository) Upsert(ctx context.Context, hash string) error {
-	return r.db.WithContext(ctx).
-		Clauses(clause.OnConflict{
-			Columns: []clause.Column{{Name: "hash"}},
-			DoUpdates: clause.Assignments(map[string]interface{}{
-				"requests": gorm.Expr("requests + 1"),
-			}),
-		}).
+func (r *AIAPIRepository) Upsert(hash string) error {
+	return r.db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "hash"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"requests": gorm.Expr("requests + 1"),
+		}),
+	}).
 		Create(&model.AIAPI{
 			Hash:     hash,
 			Requests: 0,
 		}).Error
 }
 
-// Получение кол-ва использованных запросов
-func (r *AIAPIRepository) GetRequestsCount(ctx context.Context, hash string) (int, error) {
+func (r *AIAPIRepository) GetRequestsCount(hash string) (int, error) {
 	var result model.AIAPI
 
-	err := r.db.WithContext(ctx).
-		Table("midray.ai_api").
+	err := r.db.Table("midray.ai_api").
 		Where("hash = ?", hash).
 		Select("requests").
 		Take(&result).Error
@@ -54,10 +49,8 @@ func (r *AIAPIRepository) GetRequestsCount(ctx context.Context, hash string) (in
 	return result.Requests, nil
 }
 
-// Обнуляет счетчик запросов
-func (r *AIAPIRepository) ResetRequestsCount(ctx context.Context, hash string) error {
-	result := r.db.WithContext(ctx).
-		Table("midray.ai_api").
+func (r *AIAPIRepository) ResetRequestsCount(hash string) error {
+	result := r.db.Table("midray.ai_api").
 		Where("hash = ?", hash).
 		Update("requests", 0)
 
@@ -65,7 +58,6 @@ func (r *AIAPIRepository) ResetRequestsCount(ctx context.Context, hash string) e
 		return result.Error
 	}
 
-	// Записи нет значит
 	if result.RowsAffected == 0 {
 		return errors.New("счетчика с таким api не существует")
 	}
