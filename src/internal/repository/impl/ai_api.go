@@ -42,7 +42,7 @@ func (r *AIAPIRepository) GetRequestsCount(ctx context.Context, hash string) (in
 		Table("midray.ai_api").
 		Where("hash = ?", hash).
 		Select("requests").
-		First(&result).Error
+		Take(&result).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
