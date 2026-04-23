@@ -2,18 +2,15 @@ package abstract
 
 import "context"
 
-// Интерфейс по работе с счетчиком запросов
+// IAIAPIRepository - интерфейс по работе с счетчиком запросов
 type IAIAPIRepository interface {
 
-	// Создает новый счетчик(начинается с 0)
-	CreateCounter(ctx context.Context, hash string) error
+	// Upsert создает новый счетчик, если с таким hash его еще нет -> если есть, то счетчик увеличивается на 1
+	Upsert(ctx context.Context, hash string) error
 
-	// Увеличивает счеткик запросов
-	IncrementRequestsCount(ctx context.Context, hash string) error
-
-	// Получение кол-ва использованных запросов
+	// GetRequestsCount - получает количество использованных запросов
 	GetRequestsCount(ctx context.Context, hash string) (int, error)
 
-	// Обнуляет счетчик запросов
+	// ResetRequestsCount - обнуляет счетчик запросов
 	ResetRequestsCount(ctx context.Context, hash string) error
 }
