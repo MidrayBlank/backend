@@ -35,37 +35,37 @@ func TestFullMerge(t *testing.T) {
 		if r.PopulationAmount > 0 {
 			hasPopulation++
 		}
-		if r.BirthAmount != 0 {
+		if r.BirthAmount != nil {
 			hasBirths++
 		}
-		if r.DeathAmount != 0 {
+		if r.DeathAmount != nil {
 			hasDeaths++
 		}
-		if r.ArrivalAmount != 0 {
+		if r.ArrivalAmount != nil {
 			hasArrival++
 		}
-		if r.DepartureAmount != 0 {
+		if r.DepartureAmount != nil {
 			hasDeparture++
 		}
-		if r.MaleAmount != 0 {
+		if r.MaleAmount != nil {
 			hasMale++
 		}
-		if r.FemaleAmount != 0 {
+		if r.FemaleAmount != nil {
 			hasFemale++
 		}
-		if r.LandArea != 0 {
+		if r.LandArea != nil {
 			hasLand++
 		}
-		if r.AvgSalary != 0 {
+		if r.AvgSalary != nil {
 			hasSalary++
 		}
-		if r.MedicalFacilities != 0 {
+		if r.MedicalFacilities != nil {
 			hasMedical++
 		}
-		if r.SchoolsCount != 0 {
+		if r.SchoolsCount != nil {
 			hasSchools++
 		}
-		if r.HousingCommissioned != 0 {
+		if r.HousingCommissioned != nil {
 			hasHousing++
 		}
 	}
@@ -91,16 +91,16 @@ func TestFullMerge(t *testing.T) {
 			break
 		}
 		fmt.Printf("\n  %d: code=%s, year=%d, population=%d\n", i+1, r.Code, r.Year, r.PopulationAmount)
-		if r.BirthAmount != 0 {
+		if r.BirthAmount != nil {
 			fmt.Printf("      births=%d", r.BirthAmount)
 		}
-		if r.DeathAmount != 0 {
+		if r.DeathAmount != nil {
 			fmt.Printf(", deaths=%d", r.DeathAmount)
 		}
-		if r.ArrivalAmount != 0 {
+		if r.ArrivalAmount != nil {
 			fmt.Printf(", arrival=%d", r.ArrivalAmount)
 		}
-		if r.DepartureAmount != 0 {
+		if r.DepartureAmount != nil {
 			fmt.Printf(", departure=%d", r.DepartureAmount)
 		}
 		fmt.Println()

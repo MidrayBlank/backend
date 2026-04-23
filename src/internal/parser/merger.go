@@ -77,8 +77,8 @@ func (c *DataCollector) buildRecordMap(records []DemographyRawRecord) map[string
 			Code:             r.Oktmo,
 			Year:             r.Year,
 			PopulationAmount: r.Population,
-			BirthAmount:      births,
-			DeathAmount:      deaths,
+			BirthAmount:      &births,
+			DeathAmount:      &deaths,
 		}
 	}
 
@@ -106,7 +106,7 @@ func (c *DataCollector) loadLandArea(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.LandArea = value
+				d.LandArea = &value
 			}
 		}
 	}
@@ -134,7 +134,7 @@ func (c *DataCollector) loadHealthcare(recordMap map[string]*DemographyRecord) {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
 				val := int(value)
-				d.MedicalFacilities = val
+				d.MedicalFacilities = &val
 			}
 		}
 	}
@@ -162,7 +162,7 @@ func (c *DataCollector) loadEducation(recordMap map[string]*DemographyRecord) {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
 				val := int(value)
-				d.SchoolsCount = val
+				d.SchoolsCount = &val
 			}
 		}
 	}
@@ -189,7 +189,7 @@ func (c *DataCollector) loadHousing(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.HousingCommissioned = value
+				d.HousingCommissioned = &value
 			}
 		}
 	}
@@ -216,7 +216,7 @@ func (c *DataCollector) loadSalary(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.AvgSalary = value
+				d.AvgSalary = &value
 			}
 		}
 	}
@@ -244,8 +244,8 @@ func (c *DataCollector) loadAgeSex(recordMap map[string]*DemographyRecord) {
 		for year, values := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.MaleAmount = values.Male
-				d.FemaleAmount = values.Female
+				d.MaleAmount = &values.Male
+				d.FemaleAmount = &values.Female
 			}
 		}
 	}
@@ -280,7 +280,7 @@ func (c *DataCollector) loadArrival(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.ArrivalAmount = value
+				d.ArrivalAmount = &value
 			}
 		}
 	}
@@ -316,7 +316,7 @@ func (c *DataCollector) loadDeparture(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.DepartureAmount = value
+				d.DepartureAmount = &value
 			}
 		}
 	}
