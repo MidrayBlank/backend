@@ -2,7 +2,7 @@ package model
 
 type Rosstat struct {
 	ID                  int      `gorm:"column:id;primaryKey;"`
-	Code                string   `gorm:"column:code;type:text;not null;index"`
+	Code                string   `gorm:"column:code;type:int;not null;index"`
 	Year                int      `gorm:"column:year;type:int;not null;index"`
 	PopulationAmount    int      `gorm:"column:population_amout;type:int;not null"`
 	BirthAmount         *int     `gorm:"column:birth_amount;type:int;nullable"`

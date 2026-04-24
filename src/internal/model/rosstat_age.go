@@ -1,10 +1,10 @@
 package model
 
 type RosstatAge struct {
-	RosstatID    int  `gorm:"column:rosstat_id;type:int;primaryKey"`
-	Age          int  `gorm:"column:age;type:int;primaryKey"`
-	MaleAmount   *int `gorm:"column:male_amount;type:int;nullable"`
-	FemaleAmount *int `gorm:"column:female_amount;type:int;nullable"`
+	RosstatID    int `gorm:"column:rosstat_id;type:int;primaryKey"`
+	Age          int `gorm:"column:age;type:int;primaryKey"`
+	MaleAmount   int `gorm:"column:male_amount;type:int;not null"`
+	FemaleAmount int `gorm:"column:female_amount;type:int;not null"`
 }
 
 func (RosstatAge) TableName() string {
