@@ -6,5 +6,5 @@ type AIAPI struct {
 }
 
 func (AIAPI) TableName() string {
-	return "midray.ai_api"
+	return "ai_api"
 }

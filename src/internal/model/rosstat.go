@@ -19,5 +19,5 @@ type Rosstat struct {
 }
 
 func (Rosstat) TableName() string {
-	return "midray.rosstat"
+	return "rosstat"
 }

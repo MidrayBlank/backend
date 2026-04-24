@@ -8,5 +8,5 @@ type RosstatAge struct {
 }
 
 func (RosstatAge) TableName() string {
-	return "midray.rosstat_age"
+	return "rosstat_age"
 }

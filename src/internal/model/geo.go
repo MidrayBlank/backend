@@ -8,5 +8,5 @@ type Geo struct {
 }
 
 func (Geo) TableName() string {
-	return "midray.geo"
+	return "geo"
 }
