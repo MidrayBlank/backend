@@ -5,9 +5,9 @@ import (
 	"backend/src/internal/domain"
 )
 
-type IAIAPIRepository interface {
+type IAiApiRepositoru interface {
 	Insert(conn abstract.IDBConnection, token string) error
-	GetAllRequestsCount(conn abstract.IDBConnection, tokens []string) ([]domain.AIAPI, error)
+	GetAllRequestsCount(conn abstract.IDBConnection, tokens []string) ([]domain.AiApi, error)
 	IncreaseRequests(conn abstract.IDBConnection, token string) error
 	ResetAllRequestsCount(conn abstract.IDBConnection) error
 }

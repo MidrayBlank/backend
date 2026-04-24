@@ -1,6 +1,6 @@
 package domain
 
-type AIAPI struct {
+type AiApi struct {
 	Token    string
 	Requests int
 }
