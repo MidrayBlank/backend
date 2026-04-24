@@ -26,5 +26,20 @@ func (m *Geo) ToDomain() (*domain.Geo, error) {
 }
 
 func (m *Geo) FromDomainToModel(d *domain.Geo) error {
+	if d == nil {
+		return nil
+	}
 	return copier.Copy(m, d)
+}
+
+func (m Geo) ToDomainSlice(daos []Geo) ([]domain.Geo, error) {
+	result := make([]domain.Geo, len(daos))
+	for i, dao := range daos {
+		domainItem, err := dao.ToDomain()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = *domainItem
+	}
+	return result, nil
 }

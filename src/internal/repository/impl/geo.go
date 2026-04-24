@@ -24,12 +24,8 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 	}
 
 	return db.Clauses(clause.OnConflict{
-		Columns: []clause.Column{{Name: "code"}},
-		DoUpdates: clause.AssignmentColumns([]string{
-			"parent_code",
-			"name",
-			"level",
-		}),
+		Columns:   []clause.Column{{Name: "code"}},
+		UpdateAll: true,
 	}).
 		Create(geoDAO).Error
 
@@ -46,14 +42,6 @@ func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) 
 		return nil, err
 	}
 
-	result := make([]domain.Geo, len(geoDAOs))
-	for i, dao := range geoDAOs {
-		domainGeo, err := dao.ToDomain()
-		if err != nil {
-			return nil, err
-		}
-		result[i] = *domainGeo
-	}
-
-	return result, nil
+	var m model.Geo
+	return m.ToDomainSlice(geoDAOs)
 }

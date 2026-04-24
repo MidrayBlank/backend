@@ -18,11 +18,9 @@ func NewRosstatAgeRepository() *RosstatAgeRepository {
 func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *domain.RosstatAge) error {
 	db := conn.Get().(*gorm.DB)
 
-	rosstatAgeDAO := model.RosstatAge{
-		RosstatID:    rosstatAge.RosstatID,
-		Age:          rosstatAge.Age,
-		MaleAmount:   rosstatAge.MaleAmount,
-		FemaleAmount: rosstatAge.FemaleAmount,
+	rosstatAgeDAO := &model.RosstatAge{}
+	if err := rosstatAgeDAO.FromDomainToModel(rosstatAge); err != nil {
+		return err
 	}
 
 	return db.Clauses(clause.OnConflict{
@@ -30,10 +28,7 @@ func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *d
 			{Name: "rosstat_id"},
 			{Name: "age"},
 		},
-		DoUpdates: clause.AssignmentColumns([]string{
-			"male_amount",
-			"female_amount",
-		}),
+		UpdateAll: true,
 	}).
 		Create(rosstatAgeDAO).Error
 }
@@ -49,15 +44,6 @@ func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnec
 		return nil, err
 	}
 
-	result := make([]domain.RosstatAge, len(rosstatAgeDAOs))
-	for i, dao := range rosstatAgeDAOs {
-		result[i] = domain.RosstatAge{
-			RosstatID:    dao.RosstatID,
-			Age:          dao.Age,
-			MaleAmount:   dao.MaleAmount,
-			FemaleAmount: dao.FemaleAmount,
-		}
-	}
-
-	return result, nil
+	var m model.RosstatAge
+	return m.ToDomainSlice(rosstatAgeDAOs)
 }

@@ -1,5 +1,11 @@
 package model
 
+import (
+	"backend/src/internal/domain"
+
+	"github.com/jinzhu/copier"
+)
+
 type Rosstat struct {
 	ID                  int      `gorm:"column:id;primaryKey;"`
 	Code                string   `gorm:"column:code;type:int;not null;index"`
@@ -20,4 +26,28 @@ type Rosstat struct {
 
 func (Rosstat) TableName() string {
 	return "rosstat"
+}
+
+func (m *Rosstat) ToDomain() (*domain.Rosstat, error) {
+	var result domain.Rosstat
+	if err := copier.Copy(&result, m); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (m *Rosstat) FromDomainToModel(d *domain.Rosstat) error {
+	return copier.Copy(m, d)
+}
+
+func (m Rosstat) ToDomainSlice(daos []Rosstat) ([]domain.Rosstat, error) {
+	result := make([]domain.Rosstat, len(daos))
+	for i, dao := range daos {
+		domainItem, err := dao.ToDomain()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = *domainItem
+	}
+	return result, nil
 }
