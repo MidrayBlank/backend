@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS midray;
 
 CREATE TABLE IF NOT EXISTS midray.rosstat (
     id                      SERIAL          PRIMARY KEY,
-    code                    TEXT            NOT NULL,
+    code                    INTEGER         NOT NULL,
     year                    INTEGER         NOT NULL,
 
     population_amout        INTEGER         NOT NULL,

@@ -4,8 +4,8 @@ CREATE SCHEMA IF NOT EXISTS midray;
 CREATE TABLE IF NOT EXISTS midray.rosstat_age (
     rosstat_id      INTEGER     NOT NULL,
     age             INTEGER     NOT NULL,
-    male_amount     INTEGER         NULL,
-    female_amount   INTEGER         NULL,
+    male_amount     INTEGER     NOT NULL,
+    female_amount   INTEGER     NOT NULL,
     PRIMARY KEY (rosstat_id, age)
 );
 
