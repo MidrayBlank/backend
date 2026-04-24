@@ -1,35 +1,42 @@
 package impl
 
 import (
+	"backend/src/internal/db/abstract"
+	"backend/src/internal/domain"
 	"backend/src/internal/model"
-	"errors"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-type GeoRepository struct {
-	db *gorm.DB
+type GeoRepository struct{}
+
+func NewGeoRepository() *GeoRepository {
+	return &GeoRepository{}
 }
 
-func NewGeoRepository(newDB *gorm.DB) *GeoRepository {
-	return &GeoRepository{
-		db: newDB,
+func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) error {
+	db := conn.Get().(*gorm.DB)
+
+	geoDAO := &model.Geo{
+		Code:       geo.Code,
+		ParentCode: *geo.ParentCode,
+		Name:       geo.Name,
+		Level:      geo.Level,
 	}
+
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "code"}},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"parent_code",
+			"name",
+			"level",
+		}),
+	}).
+		Create(dao).Error
+
 }
 
-func (r *GeoRepository) GetGeoByCode(code int) (*model.Geo, error) {
-	var result model.Geo
+func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]domain.Geo, error) {
 
-	err := r.db.Table("midray.geo").
-		Where("code = ?", code).
-		Take(&result).Error
-
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return &result, nil
 }

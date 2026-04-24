@@ -1,9 +1,11 @@
 package abstract
 
+import "backend/src/internal/db/abstract"
+
 type IAIAPIRepository interface {
-	Upsert(hash string) error
+	Upsert(conn abstract.IDBConnection, hash string) error
 
-	GetRequestsCount(hash string) (int, error)
+	GetRequestsCount(conn abstract.IDBConnection, hash string) (int, error)
 
-	ResetRequestsCount(hash string) error
+	ResetRequestsCount(conn abstract.IDBConnection, hash string) error
 }

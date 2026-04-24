@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"backend/src/internal/db/abstract"
 	"backend/src/internal/model"
 	"errors"
 
@@ -8,18 +9,16 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type AIAPIRepository struct {
-	db *gorm.DB
+type AIAPIRepository struct{}
+
+func NewAIAPIRepository() *AIAPIRepository {
+	return &AIAPIRepository{}
 }
 
-func NewAIAPIRepository(newDB *gorm.DB) *AIAPIRepository {
-	return &AIAPIRepository{
-		db: newDB,
-	}
-}
+func (r *AIAPIRepository) Upsert(conn abstract.IDBConnection, hash string) error {
+	db := conn.Get().(*gorm.DB)
 
-func (r *AIAPIRepository) Upsert(hash string) error {
-	return r.db.Clauses(clause.OnConflict{
+	return db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "hash"}},
 		DoUpdates: clause.Assignments(map[string]interface{}{
 			"requests": gorm.Expr("requests + 1"),
@@ -31,17 +30,18 @@ func (r *AIAPIRepository) Upsert(hash string) error {
 		}).Error
 }
 
-func (r *AIAPIRepository) GetRequestsCount(hash string) (int, error) {
+func (r *AIAPIRepository) GetRequestsCount(conn abstract.IDBConnection, hash string) (int, error) {
 	var result model.AIAPI
 
-	err := r.db.Table("midray.ai_api").
+	db := conn.Get().(*gorm.DB)
+	err := db.Table("midray.ai_api").
 		Where("hash = ?", hash).
 		Select("requests").
 		Take(&result).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return 0, errors.New("счетчика с таким api не существует")
+			return 0, errors.New("there is no counter with this api key")
 		}
 		return 0, err
 	}
@@ -49,8 +49,9 @@ func (r *AIAPIRepository) GetRequestsCount(hash string) (int, error) {
 	return result.Requests, nil
 }
 
-func (r *AIAPIRepository) ResetRequestsCount(hash string) error {
-	result := r.db.Table("midray.ai_api").
+func (r *AIAPIRepository) ResetRequestsCount(conn abstract.IDBConnection, hash string) error {
+	db := conn.Get().(*gorm.DB)
+	result := db.Table("midray.ai_api").
 		Where("hash = ?", hash).
 		Update("requests", 0)
 
@@ -59,7 +60,7 @@ func (r *AIAPIRepository) ResetRequestsCount(hash string) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("счетчика с таким api не существует")
+		return errors.New("there is no counter with this api key")
 	}
 
 	return nil

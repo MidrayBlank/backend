@@ -1,11 +1,11 @@
 package abstract
 
 import (
-	"backend/src/internal/model"
+	"backend/src/internal/db/abstract"
+	"backend/src/internal/domain"
 )
 
 type IGeoRepository interface {
-	GetGeoByCodes(code int) ([]model.Geo, error)
-
-	UpsertGeo(geo *model.Geo) error
+	Upsert(conn abstract.IDBConnection) error
+	GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]domain.Geo, error)
 }
