@@ -18,11 +18,9 @@ func NewGeoRepository() *GeoRepository {
 func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) error {
 	db := conn.Get().(*gorm.DB)
 
-	geoDAO := &model.Geo{
-		Code:       geo.Code,
-		ParentCode: geo.ParentCode,
-		Name:       geo.Name,
-		Level:      geo.Level,
+	geoDAO := &model.Geo{}
+	if err := geoDAO.FromDomainToModel(geo); err != nil {
+		return err
 	}
 
 	return db.Clauses(clause.OnConflict{
@@ -50,12 +48,11 @@ func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) 
 
 	result := make([]domain.Geo, len(geoDAOs))
 	for i, dao := range geoDAOs {
-		result[i] = domain.Geo{
-			Code:       dao.Code,
-			ParentCode: dao.ParentCode,
-			Name:       dao.Name,
-			Level:      dao.Level,
+		domainGeo, err := dao.ToDomain()
+		if err != nil {
+			return nil, err
 		}
+		result[i] = *domainGeo
 	}
 
 	return result, nil
