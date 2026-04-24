@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS midray.geo (
     code        INTEGER     PRIMARY KEY,
     parent_code INTEGER     NULL,
     name        TEXT        NOT NULL,
-    admin_type  INTEGER     NOT NULL
+    level       INTEGER     NOT NULL
 );
 
 ALTER TABLE         midray.geo           
