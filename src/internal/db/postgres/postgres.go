@@ -7,6 +7,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type PostgresDBConnection struct {
@@ -14,7 +15,11 @@ type PostgresDBConnection struct {
 }
 
 func NewPostgresConnection(dsn string) abstract.IDBConnection {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix: "midray.",
+		},
+	})
 
 	if err != nil {
 		panic(fmt.Sprintf("Can not connect to postgres DB: %s", err.Error()))
@@ -23,8 +28,8 @@ func NewPostgresConnection(dsn string) abstract.IDBConnection {
 	return &PostgresDBConnection{conn: db}
 }
 
-func (db PostgresDBConnection) Get() any {
-	return db.conn
+func (c PostgresDBConnection) Get() any {
+	return c.conn
 }
 
 func (c PostgresDBConnection) BeginTx() abstract.IDBConnection {
