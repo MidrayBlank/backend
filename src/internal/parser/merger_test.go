@@ -13,7 +13,6 @@ func TestFullMerge(t *testing.T) {
 	collector := NewDataCollector()
 
 	fmt.Println("Starting full data collection...")
-	fmt.Println("This will take about 30-40 minutes...")
 
 	records, err := collector.MergeAll()
 	if err != nil {

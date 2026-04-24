@@ -2,6 +2,7 @@ package parser
 
 import (
 	"archive/zip"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	"time"
 )
 
-func DownloadAndUnzip(url string) (string, error) {
+func DownloadAndUnzip(ctx context.Context, url string) (string, error) {
 	fmt.Printf("Downloading: %s\n", url)
 
 	tempDir, err := os.MkdirTemp("", "rosstat_*")
@@ -27,11 +28,16 @@ func DownloadAndUnzip(url string) (string, error) {
 	}
 	defer out.Close()
 
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
 	client := &http.Client{
 		Timeout: 30 * time.Minute,
 	}
 
-	resp, err := client.Get(url)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +97,7 @@ func DownloadAndUnzip(url string) (string, error) {
 	return csvPath, nil
 }
 
-func DownloadAndUnzipAll(url string) ([]string, error) {
+func DownloadAndUnzipAll(ctx context.Context, url string) ([]string, error) {
 	fmt.Printf("Downloading: %s\n", url)
 
 	tempDir, err := os.MkdirTemp("", "rosstat_*")
@@ -106,11 +112,17 @@ func DownloadAndUnzipAll(url string) ([]string, error) {
 	}
 	defer out.Close()
 
+	// СОЗДАЁМ ЗАПРОС С КОНТЕКСТОМ
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	client := &http.Client{
 		Timeout: 60 * time.Minute,
 	}
 
-	resp, err := client.Get(url)
+	resp, err := client.Do(req) // используем req
 	if err != nil {
 		return nil, err
 	}
@@ -278,4 +290,18 @@ func AggregateAgeSexWithNormalize(records *[]AgeSexRawRecord) map[string]map[int
 	}
 
 	return result
+}
+
+func IntPtr(v int) *int {
+	if v == 0 {
+		return nil
+	}
+	return &v
+}
+
+func Float64Ptr(v float64) *float64 {
+	if v == 0 {
+		return nil
+	}
+	return &v
 }

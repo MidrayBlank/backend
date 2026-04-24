@@ -1,10 +1,13 @@
 package parser
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 )
 
 type DataCollector struct {
@@ -19,33 +22,38 @@ func NewDataCollector() *DataCollector {
 
 // MergeAll собирает все данные и возвращает список записей для БД
 func (c *DataCollector) MergeAll() ([]DemographyRecord, error) {
-	// 1. Загружаем демографию (базовые данные)
-	demRecords, err := c.loadDemography()
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Minute)
+	defer cancel()
+
+	demRecords, err := c.loadDemography(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("demography error: %w", err)
 	}
 
-	// Создаём карту для быстрого доступа
 	recordMap := c.buildRecordMap(demRecords)
+	var wg sync.WaitGroup
 
-	// 2. Загружаем все дополнительные показатели
-	c.loadLandArea(recordMap)
-	c.loadHealthcare(recordMap)
-	c.loadEducation(recordMap)
-	c.loadHousing(recordMap)
-	c.loadSalary(recordMap)
-	c.loadAgeSex(recordMap)
-	c.loadArrival(recordMap)
-	c.loadDeparture(recordMap)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		c.loadMultipleParallel(ctx, recordMap)
+	}()
 
-	// 3. Преобразуем в итоговый формат
+	wg.Add(1)
+	go c.loadArrivalParallel(ctx, recordMap, &wg)
+
+	wg.Add(1)
+	go c.loadDepartureParallel(ctx, recordMap, &wg)
+
+	wg.Wait()
+
 	return c.convertToDBRecords(recordMap), nil
 }
 
-func (c *DataCollector) loadDemography() ([]DemographyRawRecord, error) {
+func (c *DataCollector) loadDemography(ctx context.Context) ([]DemographyRawRecord, error) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_mun_demography_123_v20240612/data_mun_demography_123_v20240612_csv.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -65,30 +73,22 @@ func (c *DataCollector) buildRecordMap(records []DemographyRawRecord) map[string
 	for _, r := range records {
 		key := fmt.Sprintf("%s_%d", r.Oktmo, r.Year)
 
-		var births, deaths int
-		if r.Births != 0 {
-			births = r.Births
-		}
-		if r.Deaths != 0 {
-			deaths = r.Deaths
-		}
-
 		recordMap[key] = &DemographyRecord{
 			Code:             r.Oktmo,
 			Year:             r.Year,
 			PopulationAmount: r.Population,
-			BirthAmount:      &births,
-			DeathAmount:      &deaths,
+			BirthAmount:      IntPtr(r.Births),
+			DeathAmount:      IntPtr(r.Deaths),
 		}
 	}
 
 	return recordMap
 }
 
-func (c *DataCollector) loadLandArea(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadLandArea(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section6/data_Y48006001_112_v20250918.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		log.Printf("Warning: land download error: %v", err)
 		return
@@ -106,16 +106,16 @@ func (c *DataCollector) loadLandArea(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.LandArea = &value
+				d.LandArea = Float64Ptr(value)
 			}
 		}
 	}
 }
 
-func (c *DataCollector) loadHealthcare(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadHealthcare(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section33/data_Y48018000_112_v20250918.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		log.Printf("Warning: healthcare download error: %v", err)
 		return
@@ -133,17 +133,16 @@ func (c *DataCollector) loadHealthcare(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				val := int(value)
-				d.MedicalFacilities = &val
+				d.MedicalFacilities = IntPtr(int(value))
 			}
 		}
 	}
 }
 
-func (c *DataCollector) loadEducation(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadEducation(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section34/data_Y48015001_112_v20250918.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		log.Printf("Warning: education download error: %v", err)
 		return
@@ -161,17 +160,16 @@ func (c *DataCollector) loadEducation(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				val := int(value)
-				d.SchoolsCount = &val
+				d.SchoolsCount = IntPtr(int(value))
 			}
 		}
 	}
 }
 
-func (c *DataCollector) loadHousing(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadHousing(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section37/data_Y48010001_112_v20250918.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		log.Printf("Warning: housing download error: %v", err)
 		return
@@ -189,16 +187,16 @@ func (c *DataCollector) loadHousing(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.HousingCommissioned = &value
+				d.HousingCommissioned = Float64Ptr(value)
 			}
 		}
 	}
 }
 
-func (c *DataCollector) loadSalary(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadSalary(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section32/data_Y48423007_112_v20250918.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		log.Printf("Warning: salary download error: %v", err)
 		return
@@ -216,16 +214,16 @@ func (c *DataCollector) loadSalary(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.AvgSalary = &value
+				d.AvgSalary = Float64Ptr(value)
 			}
 		}
 	}
 }
 
-func (c *DataCollector) loadAgeSex(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadAgeSex(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112014_112_v20250918.zip"
 
-	file, err := DownloadAndUnzip(url)
+	file, err := DownloadAndUnzip(ctx, url)
 	if err != nil {
 		log.Printf("Warning: agesex download error: %v", err)
 		return
@@ -244,18 +242,18 @@ func (c *DataCollector) loadAgeSex(recordMap map[string]*DemographyRecord) {
 		for year, values := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.MaleAmount = &values.Male
-				d.FemaleAmount = &values.Female
+				d.MaleAmount = IntPtr(values.Male)
+				d.FemaleAmount = IntPtr(values.Female)
 			}
 		}
 	}
 }
 
-func (c *DataCollector) loadArrival(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadArrival(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112021_112_v20250918.zip"
 
 	fmt.Println("Loading arrival data...")
-	files, err := DownloadAndUnzipAll(url)
+	files, err := DownloadAndUnzipAll(ctx, url)
 	if err != nil {
 		log.Printf("Warning: arrival download error: %v", err)
 		return
@@ -280,18 +278,18 @@ func (c *DataCollector) loadArrival(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.ArrivalAmount = &value
+				d.ArrivalAmount = IntPtr(value)
 			}
 		}
 	}
 	fmt.Printf("  Arrival: %d records\n", len(allRecords))
 }
 
-func (c *DataCollector) loadDeparture(recordMap map[string]*DemographyRecord) {
+func (c *DataCollector) loadDeparture(ctx context.Context, recordMap map[string]*DemographyRecord) {
 	url := "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112022_112_v20250918.zip"
 
 	fmt.Println("Loading departure data...")
-	files, err := DownloadAndUnzipAll(url)
+	files, err := DownloadAndUnzipAll(ctx, url)
 	if err != nil {
 		log.Printf("Warning: departure download error: %v", err)
 		return
@@ -316,7 +314,7 @@ func (c *DataCollector) loadDeparture(recordMap map[string]*DemographyRecord) {
 		for year, value := range years {
 			key := fmt.Sprintf("%s_%d", oktmo, year)
 			if d, ok := recordMap[key]; ok {
-				d.DepartureAmount = &value
+				d.DepartureAmount = IntPtr(value)
 			}
 		}
 	}
@@ -329,6 +327,57 @@ func (c *DataCollector) convertToDBRecords(recordMap map[string]*DemographyRecor
 		result = append(result, *record)
 	}
 	return result
+}
+
+// loadMultipleParallel загружает несколько показателей параллельно
+func (c *DataCollector) loadMultipleParallel(ctx context.Context, recordMap map[string]*DemographyRecord) {
+	type task struct {
+		name string
+		fn   func(context.Context, map[string]*DemographyRecord)
+	}
+
+	tasks := []task{
+		{"land_area", c.loadLandArea},
+		{"healthcare", c.loadHealthcare},
+		{"education", c.loadEducation},
+		{"housing", c.loadHousing},
+		{"salary", c.loadSalary},
+		{"age_sex", c.loadAgeSex},
+	}
+
+	tasksChan := make(chan task, len(tasks))
+	for _, t := range tasks {
+		tasksChan <- t
+	}
+	close(tasksChan)
+
+	var wg sync.WaitGroup
+	maxWorkers := 3
+
+	for i := 0; i < maxWorkers; i++ {
+		wg.Add(1)
+		go func(workerID int) {
+			defer wg.Done()
+			for t := range tasksChan {
+				fmt.Printf("  Worker %d: loading %s...\n", workerID, t.name)
+				t.fn(ctx, recordMap)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+}
+
+// loadArrivalParallel - загружает прибывших (отдельная горутина)
+func (c *DataCollector) loadArrivalParallel(ctx context.Context, recordMap map[string]*DemographyRecord, wg *sync.WaitGroup) {
+	defer wg.Done() // сообщаем, что горутина завершилась
+	c.loadArrival(ctx, recordMap)
+}
+
+// loadDepartureParallel - загружает убывших (отдельная горутина)
+func (c *DataCollector) loadDepartureParallel(ctx context.Context, recordMap map[string]*DemographyRecord, wg *sync.WaitGroup) {
+	defer wg.Done() // сообщаем, что горутина завершилась
+	c.loadDeparture(ctx, recordMap)
 }
 
 // AggregateMigrationWithNormalize агрегирует миграцию с нормализацией OKTMO
