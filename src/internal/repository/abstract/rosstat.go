@@ -6,6 +6,6 @@ import (
 )
 
 type IRosstatRepository interface {
-	Upsert(conn abstract.IDBConnection, rosstatAge *domain.Rosstat) error
-	GetRosstatByCodes(conn abstract.IDBConnection, codes []int) ([]domain.Rosstat, error)
+	Upsert(conn abstract.IDBConnection, rosstat *domain.Rosstat) error
+	GetRosstatByCodes(conn abstract.IDBConnection, codes []string) ([]domain.Rosstat, error)
 }
