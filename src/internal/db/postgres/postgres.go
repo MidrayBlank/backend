@@ -1,9 +1,8 @@
 package postgres
 
 import (
-	"fmt"
-
 	"backend/src/internal/db/abstract"
+	"fmt"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,7 +13,7 @@ type PostgresDBConnection struct {
 	conn *gorm.DB
 }
 
-func NewPostgresConnection(dsn string) abstract.IDBConnection {
+func NewPostgresConnection(dsn string) *PostgresDBConnection {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix: "midray.",
@@ -28,18 +27,18 @@ func NewPostgresConnection(dsn string) abstract.IDBConnection {
 	return &PostgresDBConnection{conn: db}
 }
 
-func (c PostgresDBConnection) Get() any {
+func (c *PostgresDBConnection) Get() any {
 	return c.conn
 }
 
-func (c PostgresDBConnection) BeginTx() abstract.IDBConnection {
+func (c *PostgresDBConnection) BeginTx() abstract.IDBConnection {
 	return &PostgresDBConnection{conn: c.conn.Begin()}
 }
 
-func (c PostgresDBConnection) Commit() error {
+func (c *PostgresDBConnection) Commit() error {
 	return c.conn.Commit().Error
 }
 
-func (c PostgresDBConnection) Rollback() {
+func (c *PostgresDBConnection) Rollback() {
 	c.conn.Rollback()
 }
