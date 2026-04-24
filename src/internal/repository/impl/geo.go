@@ -20,7 +20,7 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 
 	geoDAO := &model.Geo{
 		Code:       geo.Code,
-		ParentCode: *geo.ParentCode,
+		ParentCode: geo.ParentCode,
 		Name:       geo.Name,
 		Level:      geo.Level,
 	}
@@ -33,10 +33,30 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 			"level",
 		}),
 	}).
-		Create(dao).Error
+		Create(geoDAO).Error
 
 }
 
 func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]domain.Geo, error) {
+	db := conn.Get().(*gorm.DB)
 
+	var geoDAOs []model.Geo
+	err := db.Where("code IN ?", codes).
+		Find(&geoDAOs).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.Geo, len(geoDAOs))
+	for i, dao := range geoDAOs {
+		result[i] = domain.Geo{
+			Code:       dao.Code,
+			ParentCode: dao.ParentCode,
+			Name:       dao.Name,
+			Level:      dao.Level,
+		}
+	}
+
+	return result, nil
 }
