@@ -2,8 +2,8 @@ package model
 
 import "github.com/jinzhu/copier"
 
-func ToDomain[Model, D any](model *Model) (*D, error) {
-	var result D
+func ToDomain[Model, Domain any](model *Model) (*Domain, error) {
+	var result Domain
 	if err := copier.Copy(&result, model); err != nil {
 		return nil, err
 	}
