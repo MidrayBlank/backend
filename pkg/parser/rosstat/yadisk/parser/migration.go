@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"backend/pkg/parser/rosstat/downloader"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
 )
 
 type MigrationParser struct{}

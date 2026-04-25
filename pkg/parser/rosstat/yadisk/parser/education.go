@@ -8,16 +8,16 @@ import (
 	"strconv"
 	"strings"
 
-	"backend/pkg/parser/rosstat/downloader"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
 )
 
-type HousingParser struct{}
+type EducationParser struct{}
 
-func NewHousingParser() *HousingParser {
-	return &HousingParser{}
+func NewEducationParser() *EducationParser {
+	return &EducationParser{}
 }
 
-func (p *HousingParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
+func (p *EducationParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -65,9 +65,9 @@ func (p *HousingParser) Parse(ctx context.Context, filePath string) ([]downloade
 			continue
 		}
 
-		oktmo := strings.TrimSpace(row[10])
-		year, _ := strconv.Atoi(strings.TrimSpace(row[17]))
-		value := parseFloat(row[18])
+		oktmo := strings.TrimSpace(row[9])
+		year, _ := strconv.Atoi(strings.TrimSpace(row[16]))
+		value := parseFloat(row[17])
 
 		if oktmo == "" || year == 0 {
 			continue

@@ -1,8 +1,8 @@
 package yadisk
 
 import (
-	"backend/pkg/parser/rosstat/downloader"
-	"backend/pkg/parser/rosstat/parser"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
+	"backend/pkg/parser/rosstat/yadisk/parser"
 	"context"
 	"fmt"
 	"testing"

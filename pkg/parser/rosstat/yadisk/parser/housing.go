@@ -8,16 +8,16 @@ import (
 	"strconv"
 	"strings"
 
-	"backend/pkg/parser/rosstat/downloader"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
 )
 
-type SalaryParser struct{}
+type HousingParser struct{}
 
-func NewSalaryParser() *SalaryParser {
-	return &SalaryParser{}
+func NewHousingParser() *HousingParser {
+	return &HousingParser{}
 }
 
-func (p *SalaryParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
+func (p *HousingParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

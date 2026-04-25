@@ -8,16 +8,16 @@ import (
 	"strconv"
 	"strings"
 
-	"backend/pkg/parser/rosstat/downloader"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
 )
 
-type EducationParser struct{}
+type LandParser struct{}
 
-func NewEducationParser() *EducationParser {
-	return &EducationParser{}
+func NewLandParser() *LandParser {
+	return &LandParser{}
 }
 
-func (p *EducationParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
+func (p *LandParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -81,4 +81,13 @@ func (p *EducationParser) Parse(ctx context.Context, filePath string) ([]downloa
 	}
 
 	return records, nil
+}
+
+func parseFloat(s string) float64 {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0
+	}
+	v, _ := strconv.ParseFloat(s, 64)
+	return v
 }

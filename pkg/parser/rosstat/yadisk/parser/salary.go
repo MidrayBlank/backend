@@ -8,16 +8,16 @@ import (
 	"strconv"
 	"strings"
 
-	"backend/pkg/parser/rosstat/downloader"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
 )
 
-type HealthcareParser struct{}
+type SalaryParser struct{}
 
-func NewHealthcareParser() *HealthcareParser {
-	return &HealthcareParser{}
+func NewSalaryParser() *SalaryParser {
+	return &SalaryParser{}
 }
 
-func (p *HealthcareParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
+func (p *SalaryParser) Parse(ctx context.Context, filePath string) ([]downloader.RosstatRawRecord, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -65,9 +65,9 @@ func (p *HealthcareParser) Parse(ctx context.Context, filePath string) ([]downlo
 			continue
 		}
 
-		oktmo := strings.TrimSpace(row[9])
-		year, _ := strconv.Atoi(strings.TrimSpace(row[16]))
-		value := parseFloat(row[17])
+		oktmo := strings.TrimSpace(row[10])
+		year, _ := strconv.Atoi(strings.TrimSpace(row[17]))
+		value := parseFloat(row[18])
 
 		if oktmo == "" || year == 0 {
 			continue

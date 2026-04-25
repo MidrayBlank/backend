@@ -1,6 +1,5 @@
 package model
 
-// DemographyRecord - итоговая запись для БД (основная таблица rosstat)
 type DemographyRecord struct {
 	ID                  int
 	Code                string   // ОКТМО

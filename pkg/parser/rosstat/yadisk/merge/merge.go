@@ -1,7 +1,7 @@
 package merge
 
 import (
-	"backend/pkg/parser/rosstat/downloader"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
 	"backend/pkg/parser/rosstat/yadisk/model"
 	"fmt"
 )

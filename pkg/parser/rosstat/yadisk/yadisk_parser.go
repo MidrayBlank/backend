@@ -10,9 +10,9 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"backend/pkg/parser/rosstat/abstract"
-	"backend/pkg/parser/rosstat/downloader"
-	"backend/pkg/parser/rosstat/merge"
-	"backend/pkg/parser/rosstat/parser"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
+	"backend/pkg/parser/rosstat/yadisk/merge"
+	"backend/pkg/parser/rosstat/yadisk/parser"
 )
 
 // URL переменные
