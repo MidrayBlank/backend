@@ -8,6 +8,23 @@ info:
     и AI справку.
   version: 1.0.0
 paths:
+  /api/v1/geo:
+    get:
+      summary: Получение древовидной структуры РФ.
+      description: |
+        Древовидная структура представлена в виде:
+        1. РФ
+        2. Субъект РФ
+        3. Муниципалитет верхнего уровня
+        4. Муниципалитет нижнего уровня.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoResponse'
+
   /api/v1/rosstat:
     get:
       summary: Получение данных Росстата.
@@ -63,6 +80,83 @@ components:
         error:
           type: string
           description: Описание ошибки
+
+    LowerMunicipality:
+      type: object
+      description: Муниципалитет нижнего уровня.
+      properties:
+        name:
+          type: string
+          description: Наименование муниципалитета нижнего уровня.
+        code:
+          type: integer
+          description: Код муниципалитета нижнего уровня.
+      required:
+        - name
+        - code
+
+    UpperMunicipality:
+      type: object
+      description: Муниципалитет верхнего уровня.
+      properties:
+        name:
+          type: string
+          description: Наименование муниципалитета верхнего уровня.
+        code:
+          type: integer
+          description: Код муниципалитета верхнего уровня.
+        upper_municipalities:
+          type: array
+          description: Муниципалитеты нижнего уровня.
+          items:
+            $ref: '#/components/schemas/LowerMunicipality'
+      required:
+        - name
+        - code
+        - lower_municipalities
+
+    FederalSubject:
+      type: object
+      description: Субъект РФ.
+      properties:
+        name:
+          type: string
+          description: Наименование субъекта РФ.
+        code:
+          type: integer
+          description: Код субъекта РФ.
+        upper_municipalities:
+          type: array
+          description: Муниципалитеты верхнего уровня.
+          items:
+            $ref: '#/components/schemas/UpperMunicipality'
+      required:
+        - name
+        - code
+        - upper_municipalities
+
+    GeoResponse:
+      type: object
+      description: Древовидная структура РФ.
+      properties:
+        name:
+          type: string
+          description: Название страны.
+          example: Российская Федерация
+        code:
+          type: integer
+          description: Код страны.
+          example: 0
+        federal_subjects:
+          type: array
+          description: Список субъектов РФ.
+          items:
+            $ref: '#/components/schemas/FederalSubject'
+      required:
+        - name
+        - code
+        - federal_subjects
+        
     RosstatByAge:
       type: object
       properties:
@@ -79,6 +173,7 @@ components:
         - age
         - male
         - female
+
     RosstatByYear:
       type: object
       properties:
@@ -133,6 +228,7 @@ components:
           description: Численность мужчин и женщин по возрасту за год.
           items:
             $ref: '#/components/schemas/RosstatByAge'
+
     Rosstat:
       type: object
       properties:
@@ -150,6 +246,7 @@ components:
       required:
         - code
         - by_year
+
     RosstatResponse:
       type: array
       items:
