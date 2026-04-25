@@ -15,14 +15,14 @@ func (RosstatAge) TableName() string {
 	return "rosstat_age"
 }
 
-func (m *RosstatAge) ToDomain() (*domain.RosstatAge, error) {
-	return ToDomain[RosstatAge, domain.RosstatAge](m)
+func (model *RosstatAge) ToDomain() (*domain.RosstatAge, error) {
+	return ToDomain[RosstatAge, domain.RosstatAge](model)
 }
 
-func (m *RosstatAge) ToModel(d *domain.RosstatAge) error {
-	return ToModel[RosstatAge, domain.RosstatAge](m, d)
+func (model *RosstatAge) ToModel(d *domain.RosstatAge) error {
+	return ToModel[RosstatAge, domain.RosstatAge](model, d)
 }
 
-func (m RosstatAge) ToDomainSlice(daos []RosstatAge) ([]domain.RosstatAge, error) {
-	return ToDomainSlice[RosstatAge, domain.RosstatAge](daos)
+func (model RosstatAge) ToDomainSlice(models []RosstatAge) ([]domain.RosstatAge, error) {
+	return ToDomainSlice[RosstatAge, domain.RosstatAge](models)
 }
