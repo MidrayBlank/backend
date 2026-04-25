@@ -9,6 +9,6 @@ COPY . .
 
 RUN go build -o app ./src/cmd/backend
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["./app"] 

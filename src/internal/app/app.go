@@ -36,5 +36,5 @@ func Run() {
 	app.Get("/openapi.yaml", api.OpenapiYamlHandler)
 	app.Get("/api/*", api.ApiHandler())
 
-	log.Fatal(app.Listen(":8080"))
+	log.Fatal(app.Listen(":80"))
 }
