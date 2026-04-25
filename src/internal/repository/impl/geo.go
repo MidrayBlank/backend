@@ -33,7 +33,7 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 
 }
 
-func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]domain.Geo, error) {
+func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]*domain.Geo, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var geoDAOs []model.Geo

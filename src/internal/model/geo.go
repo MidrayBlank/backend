@@ -23,6 +23,6 @@ func (modelObj *Geo) ToModel(domainObj *domain.Geo) (*Geo, error) {
 	return ToModel[Geo, domain.Geo](domainObj)
 }
 
-func (modelObj Geo) ToDomainSlice(modelObjs []Geo) ([]domain.Geo, error) {
+func (modelObj Geo) ToDomainSlice(modelObjs []Geo) ([]*domain.Geo, error) {
 	return ToDomainSlice[Geo, domain.Geo](modelObjs)
 }

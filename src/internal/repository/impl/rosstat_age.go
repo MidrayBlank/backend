@@ -35,7 +35,7 @@ func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *d
 		Create(rosstatAgeDAO).Error
 }
 
-func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnection, ids []int) ([]domain.RosstatAge, error) {
+func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnection, ids []int) ([]*domain.RosstatAge, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var rosstatAgeDAOs []model.RosstatAge

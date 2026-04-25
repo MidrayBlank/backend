@@ -55,7 +55,7 @@ func (r *AiApiRepository) IncreaseRequests(conn abstract.IDBConnection, token st
 	return nil
 }
 
-func (r *AiApiRepository) GetAllRequestsCount(conn abstract.IDBConnection, tokens []string) ([]domain.AiApi, error) {
+func (r *AiApiRepository) GetAllRequestsCount(conn abstract.IDBConnection, tokens []string) ([]*domain.AiApi, error) {
 	db := conn.Get().(*gorm.DB)
 
 	tokensHashMap := make(map[string]string, len(tokens))

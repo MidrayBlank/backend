@@ -29,14 +29,15 @@ func (modelObj *AiApi) ToDomain(token string, requests int) (*domain.AiApi, erro
 	}, nil
 }
 
-func (modelObj *AiApi) ToDomainSlice(modelObjs []AiApi, tokensHashMap map[string]string) ([]domain.AiApi, error) {
-	result := make([]domain.AiApi, len(modelObjs))
+func (modelObj *AiApi) ToDomainSlice(modelObjs []AiApi, tokensHashMap map[string]string) ([]*domain.AiApi, error) {
+	result := make([]*domain.AiApi, len(modelObjs))
+	var err error
+
 	for i, dao := range modelObjs {
-		domainObj, err := dao.ToDomain(tokensHashMap[dao.Hash], dao.Requests)
+		result[i], err = dao.ToDomain(tokensHashMap[dao.Hash], dao.Requests)
 		if err != nil {
 			return nil, err
 		}
-		result[i] = *domainObj
 	}
 
 	return result, nil

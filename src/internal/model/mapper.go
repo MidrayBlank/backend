@@ -18,14 +18,15 @@ func ToModel[ModelType, DomainType any](domainObj *DomainType) (*ModelType, erro
 	return &result, nil
 }
 
-func ToDomainSlice[ModelType, DomainType any](modelObjs []ModelType) ([]DomainType, error) {
-	result := make([]DomainType, len(modelObjs))
+func ToDomainSlice[ModelType, DomainType any](modelObjs []ModelType) ([]*DomainType, error) {
+	result := make([]*DomainType, len(modelObjs))
+	var err error
+
 	for i, modelObj := range modelObjs {
-		domainObj, err := ToDomain[ModelType, DomainType](&modelObj)
+		result[i], err = ToDomain[ModelType, DomainType](&modelObj)
 		if err != nil {
 			return nil, err
 		}
-		result[i] = *domainObj
 	}
 	return result, nil
 }

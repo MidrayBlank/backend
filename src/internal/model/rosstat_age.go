@@ -23,6 +23,6 @@ func (modelObj *RosstatAge) ToModel(domainObj *domain.RosstatAge) (*RosstatAge, 
 	return ToModel[RosstatAge, domain.RosstatAge](domainObj)
 }
 
-func (modelObj RosstatAge) ToDomainSlice(modelObjs []RosstatAge) ([]domain.RosstatAge, error) {
+func (modelObj RosstatAge) ToDomainSlice(modelObjs []RosstatAge) ([]*domain.RosstatAge, error) {
 	return ToDomainSlice[RosstatAge, domain.RosstatAge](modelObjs)
 }
