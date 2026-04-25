@@ -44,6 +44,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+    - ./src/api/public:/app/src/api/public
 
 volumes:
   postgres_data:

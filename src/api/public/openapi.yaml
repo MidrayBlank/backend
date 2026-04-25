@@ -1,12 +1,16 @@
 openapi: 3.0.3
 info:
-  title: API сервиса Midray (ТЕСТ)
-  description: API сервиса Midray (ТЕСТ).
+  title: API сервиса Midray
+  description: |
+    С помощью этого API можно выгрузить данные Росстата
+    и прочие рассчитанные данные для дашбордов,
+    запросить прогноз по численнсоти населения
+    и AI справку.
   version: 1.0.0
 paths:
   /api/v1/rosstat:
     get:
-      summary: Получение данных Росстата (ТЕСТ)
+      summary: Получение данных Росстата.
       parameters:
         - name: fields
           in: query
@@ -16,6 +20,9 @@ paths:
             type: array
             items:
               type: string
+              enum: [population, birth, death, arrival, departure, age,
+                    male, female, land_area, avg_salary,
+                    medicial_facilities, schools, housing_commissioned] 
           style: form
           explode: true
           example: ["population", "birth", "death"]
@@ -24,7 +31,7 @@ paths:
           required: false
           description: |
             Коды муниципалитетов и субъектов РФ.
-            Если параметр не указан, выгружаются общие данные по России.
+            Если параметр не указан, выгружаются общие данные по РФ.
           schema:
             type: array
             items:
@@ -38,9 +45,112 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/RosstatResponse'
         '400':
-          description: Отсутствует обязательный параметр
+          description: |
+            Отсутствует обязательный параметр
+            или указанный код не существует.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Описание ошибки
+    RosstatByAge:
+      type: object
+      properties:
+        age:
+          type: integer
+          description: Возраст.
+        male:
+          type: integer
+          description: Численность мужчин указанного возраста.
+        female:
+          type: integer
+          description: Численность женщин указанного возраста.
+      required:
+        - age
+        - male
+        - female
+    RosstatByYear:
+      type: object
+      properties:
+        population:
+          type: integer
+          description: Численность населения за указанный год.
+        birth:
+          type: integer
+          description: Численность рожденных за указанный год.
+        death:
+          type: integer
+          description: Численность умерших за указанный год.
+        arrival:
+          type: integer
+          description: Численность прибывших за указанный год.
+        departure:
+          type: integer
+          description: Численность выбывших за указанный год.
+        male:
+          type: integer
+          description: Численность мужчин за указанный год.
+        female:
+          type: integer
+          description: Численность женщин за указанный год.
+        land_area:
+          type: number
+          format: float
+          description: Земельная площадь субъекта РФ или муниципалитета за указанный год.
+        avg_salary:
+          type: number
+          format: float
+          description: |
+            Средняя заработная плата по субъекту РФ или муниципалитету
+            за указанный год.
+        medicial_facilities:
+          type: integer
+          description: |
+            Число медицинских учреждений в субъекте РФ или муниципалитете
+            за указанный год.
+        schools:
+          type: integer
+          description: |
+            Число школ в субъекте РФ или муниципалитете
+            за указанный год.
+        housing_commissioned:
+          type: integer
+          description: |
+            Число введенных в эксплуатацию жилых объектов в субъекте РФ или муниципалитете
+            за указанный год.
+        by_age:
+          type: array
+          description: Численность мужчин и женщин по возрасту за год.
+          items:
+            $ref: '#/components/schemas/RosstatByAge'
+    Rosstat:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: |
+            Код субъекта РФ или муниципалитета.
+            РФ использует код 0.
+        by_year:
+          type: array
+          description: |
+            Данные Росстата по годам.
+          items:
+            $ref: '#/components/schemas/RosstatByYear'
+      required:
+        - code
+        - by_year
+    RosstatResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Rosstat'
