@@ -1,12 +1,13 @@
 package impl
 
 import (
-	"backend/src/internal/db/abstract"
-	"backend/src/internal/domain"
-	"backend/src/internal/model"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+
+	"backend/src/internal/db/abstract"
+	"backend/src/internal/domain"
+	"backend/src/internal/model"
 
 	"gorm.io/gorm"
 )

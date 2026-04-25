@@ -1,8 +1,9 @@
 package postgres
 
 import (
-	"backend/src/internal/db/abstract"
 	"fmt"
+
+	"backend/src/internal/db/abstract"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
