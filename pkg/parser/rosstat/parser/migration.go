@@ -1,12 +1,15 @@
 package parser
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"backend/pkg/parser/rosstat/downloader"
 )
 
 type MigrationParser struct{}
@@ -15,18 +18,32 @@ func NewMigrationParser() *MigrationParser {
 	return &MigrationParser{}
 }
 
-func (p *MigrationParser) ParseMigration(filePath string) ([]MigrationRecord, error) {
+func (p *MigrationParser) ParseMigration(ctx context.Context, filePath string) ([]downloader.MigrationRecord, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	reader := csv.NewReader(file)
 	reader.Comma = ';'
 
 	rows, err := reader.ReadAll()
 	if err != nil {
+		return nil, err
+	}
+
+	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 
@@ -42,9 +59,17 @@ func (p *MigrationParser) ParseMigration(filePath string) ([]MigrationRecord, er
 		VOZR_COL   = 6
 	)
 
-	var records []MigrationRecord
+	var records []downloader.MigrationRecord
 
-	for _, row := range rows[1:] {
+	for i, row := range rows[1:] {
+		if i%10000 == 0 {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+			}
+		}
+
 		if len(row) <= VALUE_COL {
 			continue
 		}
@@ -79,7 +104,7 @@ func (p *MigrationParser) ParseMigration(filePath string) ([]MigrationRecord, er
 			continue
 		}
 
-		records = append(records, MigrationRecord{
+		records = append(records, downloader.MigrationRecord{
 			Oktmo: oktmo,
 			Year:  year,
 			Value: int(value),

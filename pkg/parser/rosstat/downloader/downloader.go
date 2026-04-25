@@ -1,4 +1,4 @@
-package parser
+package downloader
 
 import (
 	"archive/zip"
@@ -67,6 +67,13 @@ func DownloadAndUnzip(ctx context.Context, url string) (string, error) {
 
 	var csvPath string
 	for _, f := range r.File {
+		// Проверка контекста
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
+		default:
+		}
+
 		if strings.HasSuffix(f.Name, ".csv") && !f.FileInfo().IsDir() {
 			rc, err := f.Open()
 			if err != nil {
@@ -112,7 +119,6 @@ func DownloadAndUnzipAll(ctx context.Context, url string) ([]string, error) {
 	}
 	defer out.Close()
 
-	// СОЗДАЁМ ЗАПРОС С КОНТЕКСТОМ
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -122,7 +128,7 @@ func DownloadAndUnzipAll(ctx context.Context, url string) ([]string, error) {
 		Timeout: 60 * time.Minute,
 	}
 
-	resp, err := client.Do(req) // используем req
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -153,6 +159,13 @@ func DownloadAndUnzipAll(ctx context.Context, url string) ([]string, error) {
 	var csvPaths []string
 
 	for _, f := range r.File {
+		// Проверка контекста
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		if strings.HasSuffix(f.Name, ".csv") && !f.FileInfo().IsDir() {
 			destPath := filepath.Join(tempDir, f.Name)
 
@@ -236,9 +249,17 @@ func GetDistrictOktmo(oktmo string) string {
 }
 
 // AggregateByDistrict агрегирует по районам
-func AggregateByDistrict(records *[]RosstatRawRecord) map[string]map[int]float64 {
+func AggregateByDistrict(ctx context.Context, records *[]RosstatRawRecord) map[string]map[int]float64 {
 	result := make(map[string]map[int]float64)
-	for _, r := range *records {
+	for i, r := range *records {
+		// Проверка каждые 10000 записей
+		if i%10000 == 0 {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+			}
+		}
 		districtOktmo := GetDistrictOktmo(r.Oktmo)
 		if result[districtOktmo] == nil {
 			result[districtOktmo] = make(map[int]float64)
@@ -249,9 +270,17 @@ func AggregateByDistrict(records *[]RosstatRawRecord) map[string]map[int]float64
 }
 
 // AggregateSimple агрегирует по точному OKTMO
-func AggregateSimple(records *[]RosstatRawRecord) map[string]map[int]float64 {
+func AggregateSimple(ctx context.Context, records *[]RosstatRawRecord) map[string]map[int]float64 {
 	result := make(map[string]map[int]float64)
-	for _, r := range *records {
+	for i, r := range *records {
+		// Проверка каждые 10000 записей
+		if i%10000 == 0 {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+			}
+		}
 		if result[r.Oktmo] == nil {
 			result[r.Oktmo] = make(map[int]float64)
 		}
@@ -260,35 +289,24 @@ func AggregateSimple(records *[]RosstatRawRecord) map[string]map[int]float64 {
 	return result
 }
 
-// AggregateAgeSexWithNormalize агрегирует половозрастные данные с нормализацией OKTMO
-func AggregateAgeSexWithNormalize(records *[]AgeSexRawRecord) map[string]map[int]struct {
-	Male   int
-	Female int
-} {
-	result := make(map[string]map[int]struct {
-		Male   int
-		Female int
-	})
-
-	for _, r := range *records {
+// AggregateMigrationWithNormalize агрегирует миграцию с нормализацией OKTMO
+func AggregateMigrationWithNormalize(ctx context.Context, records *[]MigrationRecord) map[string]map[int]int {
+	result := make(map[string]map[int]int)
+	for i, r := range *records {
+		// Проверка каждые 10000 записей
+		if i%10000 == 0 {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+			}
+		}
 		normalizedOktmo := NormalizeOktmo(r.Oktmo)
-
 		if result[normalizedOktmo] == nil {
-			result[normalizedOktmo] = make(map[int]struct {
-				Male   int
-				Female int
-			})
+			result[normalizedOktmo] = make(map[int]int)
 		}
-
-		entry := result[normalizedOktmo][r.Year]
-		if r.Sex == "Мужчины" {
-			entry.Male += r.Value
-		} else if r.Sex == "Женщины" {
-			entry.Female += r.Value
-		}
-		result[normalizedOktmo][r.Year] = entry
+		result[normalizedOktmo][r.Year] += r.Value
 	}
-
 	return result
 }
 
@@ -304,4 +322,18 @@ func Float64Ptr(v float64) *float64 {
 		return nil
 	}
 	return &v
+}
+
+// RosstatRawRecord - сырые данные из файлов Росстата
+type RosstatRawRecord struct {
+	Oktmo string
+	Year  int
+	Value float64
+}
+
+// MigrationRecord - запись миграции
+type MigrationRecord struct {
+	Oktmo string
+	Year  int
+	Value int
 }
