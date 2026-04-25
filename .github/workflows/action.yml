@@ -30,7 +30,7 @@ jobs:
           version: 'latest'
 
       - name: Build and run services
-        run: docker compose up db backend -d --build --wait --wait-timeout 60
+        run: docker compose up -d --build --wait --wait-timeout 60
 
       - name: Shutdown Docker Compose
         if: always()

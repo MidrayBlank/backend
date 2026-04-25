@@ -1,4 +1,4 @@
-FROM golang:1.26.1-alpine AS builder
+FROM golang:1.26.1-alpine
 
 WORKDIR /app
 
@@ -7,15 +7,8 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /bin/app ./src/cmd/backend
+RUN go build -o app ./src/cmd/backend
 
-FROM alpine:3.21
+EXPOSE 8080
 
-RUN adduser -D nonroot
-USER nonroot
-
-COPY --from=builder /bin/app /app
-
-EXPOSE 80
-
-CMD ["/app"]
+CMD ["./app"] 
