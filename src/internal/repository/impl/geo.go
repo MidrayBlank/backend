@@ -19,7 +19,9 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 	db := conn.Get().(*gorm.DB)
 
 	geoDAO := &model.Geo{}
-	if err := geoDAO.ToModel(geo); err != nil {
+	geoDAO, err := geoDAO.ToModel(geo)
+
+	if err != nil {
 		return err
 	}
 

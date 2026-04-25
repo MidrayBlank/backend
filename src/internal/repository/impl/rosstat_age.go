@@ -19,7 +19,9 @@ func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *d
 	db := conn.Get().(*gorm.DB)
 
 	rosstatAgeDAO := &model.RosstatAge{}
-	if err := rosstatAgeDAO.ToModel(rosstatAge); err != nil {
+	rosstatAgeDAO, err := rosstatAgeDAO.ToModel(rosstatAge)
+
+	if err != nil {
 		return err
 	}
 

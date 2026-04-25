@@ -10,11 +10,12 @@ func ToDomain[Model, Domain any](model *Model) (*Domain, error) {
 	return &result, nil
 }
 
-func ToModel[Model, Domain any](model *Model, domain *Domain) error {
-	if domain == nil {
-		return nil
+func ToModel[Model, Domain any](model *Model, domain *Domain) (*Model, error) {
+	var result Model
+	if err := copier.Copy(&result, domain); err != nil {
+		return nil, err
 	}
-	return copier.Copy(model, domain)
+	return &result, nil
 }
 
 func ToDomainSlice[Model, Domain any](models []Model) ([]Domain, error) {

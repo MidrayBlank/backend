@@ -19,7 +19,7 @@ func (model *Geo) ToDomain() (*domain.Geo, error) {
 	return ToDomain[Geo, domain.Geo](model)
 }
 
-func (model *Geo) ToModel(d *domain.Geo) error {
+func (model *Geo) ToModel(d *domain.Geo) (*Geo, error) {
 	return ToModel[Geo, domain.Geo](model, d)
 }
 

@@ -19,7 +19,7 @@ func (model *RosstatAge) ToDomain() (*domain.RosstatAge, error) {
 	return ToDomain[RosstatAge, domain.RosstatAge](model)
 }
 
-func (model *RosstatAge) ToModel(d *domain.RosstatAge) error {
+func (model *RosstatAge) ToModel(d *domain.RosstatAge) (*RosstatAge, error) {
 	return ToModel[RosstatAge, domain.RosstatAge](model, d)
 }
 

@@ -33,6 +33,6 @@ func (model *Rosstat) ToDomain() (*domain.Rosstat, error) {
 func (model Rosstat) ToDomainSlice(models []Rosstat) ([]domain.Rosstat, error) {
 	return ToDomainSlice[Rosstat, domain.Rosstat](models)
 }
-func (model *Rosstat) ToModel(d *domain.Rosstat) error {
+func (model *Rosstat) ToModel(d *domain.Rosstat) (*Rosstat, error) {
 	return ToModel[Rosstat, domain.Rosstat](model, d)
 }
