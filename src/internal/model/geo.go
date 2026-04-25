@@ -15,14 +15,14 @@ func (Geo) TableName() string {
 	return "geo"
 }
 
-func (model *Geo) ToDomain() (*domain.Geo, error) {
-	return ToDomain[Geo, domain.Geo](model)
+func (modelObj *Geo) ToDomain() (*domain.Geo, error) {
+	return ToDomain[Geo, domain.Geo](modelObj)
 }
 
-func (model *Geo) ToModel(d *domain.Geo) (*Geo, error) {
-	return ToModel[Geo, domain.Geo](model, d)
+func (modelObj *Geo) ToModel(domainObj *domain.Geo) (*Geo, error) {
+	return ToModel[Geo, domain.Geo](domainObj)
 }
 
-func (model Geo) ToDomainSlice(models []Geo) ([]domain.Geo, error) {
-	return ToDomainSlice[Geo, domain.Geo](models)
+func (modelObj Geo) ToDomainSlice(modelObjs []Geo) ([]domain.Geo, error) {
+	return ToDomainSlice[Geo, domain.Geo](modelObjs)
 }

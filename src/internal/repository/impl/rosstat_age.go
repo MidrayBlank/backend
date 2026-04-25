@@ -46,6 +46,6 @@ func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnec
 		return nil, err
 	}
 
-	var m model.RosstatAge
-	return m.ToDomainSlice(rosstatAgeDAOs)
+	var modelObj model.RosstatAge
+	return modelObj.ToDomainSlice(rosstatAgeDAOs)
 }

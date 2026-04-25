@@ -58,13 +58,12 @@ func (r *AiApiRepository) GetAllRequestsCount(conn abstract.IDBConnection, token
 	db := conn.Get().(*gorm.DB)
 
 	tokensHashMap := make(map[string]string, len(tokens))
-	for _, token := range tokens {
+	hashedTokens := make([]string, len(tokens))
+
+	for i, token := range tokens {
 		hash := r.hashToken(token)
 		tokensHashMap[hash] = token
-	}
 
-	hashedTokens := make([]string, len(tokens))
-	for i, token := range tokens {
 		hashedTokens[i] = r.hashToken(token)
 	}
 
@@ -75,14 +74,8 @@ func (r *AiApiRepository) GetAllRequestsCount(conn abstract.IDBConnection, token
 		return nil, err
 	}
 
-	result := make([]domain.AiApi, len(AiApiDaos))
-	for i, dao := range AiApiDaos {
-		result[i] = domain.AiApi{
-			Token:    tokensHashMap[dao.Hash],
-			Requests: dao.Requests,
-		}
-	}
-	return result, nil
+	var modelObj model.AiApi
+	return modelObj.ToDomainSlice(AiApiDaos, tokensHashMap)
 }
 
 func (r *AiApiRepository) ResetAllRequestsCount(conn abstract.IDBConnection) error {

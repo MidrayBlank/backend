@@ -26,13 +26,13 @@ func (Rosstat) TableName() string {
 	return "rosstat"
 }
 
-func (model *Rosstat) ToDomain() (*domain.Rosstat, error) {
-	return ToDomain[Rosstat, domain.Rosstat](model)
+func (modelObj *Rosstat) ToDomain() (*domain.Rosstat, error) {
+	return ToDomain[Rosstat, domain.Rosstat](modelObj)
 }
 
-func (model Rosstat) ToDomainSlice(models []Rosstat) ([]domain.Rosstat, error) {
-	return ToDomainSlice[Rosstat, domain.Rosstat](models)
+func (modelObj Rosstat) ToDomainSlice(modelObjs []Rosstat) ([]domain.Rosstat, error) {
+	return ToDomainSlice[Rosstat, domain.Rosstat](modelObjs)
 }
-func (model *Rosstat) ToModel(d *domain.Rosstat) (*Rosstat, error) {
-	return ToModel[Rosstat, domain.Rosstat](model, d)
+func (modelObj *Rosstat) ToModel(domainObj *domain.Rosstat) (*Rosstat, error) {
+	return ToModel[Rosstat, domain.Rosstat](domainObj)
 }

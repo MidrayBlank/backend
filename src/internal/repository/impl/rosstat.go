@@ -44,6 +44,6 @@ func (r *RosstatRepository) GetRosstatByCodes(conn abstract.IDBConnection, codes
 		return nil, err
 	}
 
-	var m model.Rosstat
-	return m.ToDomainSlice(rosstatDAOs)
+	var modelObj model.Rosstat
+	return modelObj.ToDomainSlice(rosstatDAOs)
 }

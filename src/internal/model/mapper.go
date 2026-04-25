@@ -2,30 +2,30 @@ package model
 
 import "github.com/jinzhu/copier"
 
-func ToDomain[Model, Domain any](model *Model) (*Domain, error) {
-	var result Domain
-	if err := copier.Copy(&result, model); err != nil {
+func ToDomain[ModelType, DomainType any](modelObj *ModelType) (*DomainType, error) {
+	var result DomainType
+	if err := copier.Copy(&result, modelObj); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func ToModel[Model, Domain any](model *Model, domain *Domain) (*Model, error) {
-	var result Model
-	if err := copier.Copy(&result, domain); err != nil {
+func ToModel[ModelType, DomainType any](domainObj *DomainType) (*ModelType, error) {
+	var result ModelType
+	if err := copier.Copy(&result, domainObj); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func ToDomainSlice[Model, Domain any](models []Model) ([]Domain, error) {
-	result := make([]Domain, len(models))
-	for i, model := range models {
-		domain, err := ToDomain[Model, Domain](&model)
+func ToDomainSlice[ModelType, DomainType any](modelObjs []ModelType) ([]DomainType, error) {
+	result := make([]DomainType, len(modelObjs))
+	for i, modelObj := range modelObjs {
+		domainObj, err := ToDomain[ModelType, DomainType](&modelObj)
 		if err != nil {
 			return nil, err
 		}
-		result[i] = *domain
+		result[i] = *domainObj
 	}
 	return result, nil
 }

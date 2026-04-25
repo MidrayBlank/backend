@@ -44,6 +44,6 @@ func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) 
 		return nil, err
 	}
 
-	var m model.Geo
-	return m.ToDomainSlice(geoDAOs)
+	var modelObj model.Geo
+	return modelObj.ToDomainSlice(geoDAOs)
 }
