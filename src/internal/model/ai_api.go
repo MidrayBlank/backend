@@ -2,8 +2,6 @@ package model
 
 import (
 	"backend/src/internal/domain"
-
-	"github.com/jinzhu/copier"
 )
 
 type AiApi struct {
@@ -16,11 +14,7 @@ func (AiApi) TableName() string {
 }
 
 func (m *AiApi) ToDomain() (*domain.AiApi, error) {
-	var result domain.AiApi
-	if err := copier.Copy(&result, m); err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return ToDomain[AiApi, domain.AiApi](m)
 }
 
 func (m AiApi) ToDomainSlice(daos []AiApi) ([]domain.AiApi, error) {

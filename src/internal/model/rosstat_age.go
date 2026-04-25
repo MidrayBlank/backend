@@ -2,8 +2,6 @@ package model
 
 import (
 	"backend/src/internal/domain"
-
-	"github.com/jinzhu/copier"
 )
 
 type RosstatAge struct {
@@ -18,25 +16,13 @@ func (RosstatAge) TableName() string {
 }
 
 func (m *RosstatAge) ToDomain() (*domain.RosstatAge, error) {
-	var result domain.RosstatAge
-	if err := copier.Copy(&result, m); err != nil {
-		return nil, err
-	}
-	return &result, nil
+	return ToDomain[RosstatAge, domain.RosstatAge](m)
 }
 
-func (m *RosstatAge) FromDomainToModel(d *domain.RosstatAge) error {
-	return copier.Copy(m, d)
+func (m *RosstatAge) ToModel(d *domain.RosstatAge) error {
+	return ToModel[RosstatAge, domain.RosstatAge](m, d)
 }
 
 func (m RosstatAge) ToDomainSlice(daos []RosstatAge) ([]domain.RosstatAge, error) {
-	result := make([]domain.RosstatAge, len(daos))
-	for i, dao := range daos {
-		domainItem, err := dao.ToDomain()
-		if err != nil {
-			return nil, err
-		}
-		result[i] = *domainItem
-	}
-	return result, nil
+	return ToDomainSlice[RosstatAge, domain.RosstatAge](daos)
 }
