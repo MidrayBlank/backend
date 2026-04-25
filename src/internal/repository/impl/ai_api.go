@@ -27,9 +27,10 @@ func (r *AiApiRepository) Insert(conn abstract.IDBConnection, token string) erro
 	db := conn.Get().(*gorm.DB)
 	hash := r.hashToken(token)
 
-	dao := &model.AiApi{
-		Hash:     hash,
-		Requests: 0,
+	dao := &model.AiApi{}
+	dao, err := dao.ToModel(hash)
+	if err != nil {
+		return err
 	}
 
 	return db.Where("hash = ?", hash).
