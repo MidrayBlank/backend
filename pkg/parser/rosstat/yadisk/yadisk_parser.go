@@ -7,111 +7,103 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/sync/errgroup"
-
-	"backend/pkg/parser/rosstat/abstract"
+	"backend/pkg/parser/rosstat/yadisk/config"
 	"backend/pkg/parser/rosstat/yadisk/downloader"
+	"backend/pkg/parser/rosstat/yadisk/extractor"
 	"backend/pkg/parser/rosstat/yadisk/merge"
-	"backend/pkg/parser/rosstat/yadisk/parser"
+	"backend/pkg/parser/rosstat/yadisk/model"
+
+	"golang.org/x/sync/errgroup"
 )
 
-// URL переменные
-var (
-	populationURL = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112027_112_v20250918.zip"
-	birthsURL     = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112003_112_v20250918.zip"
-	deathsURL     = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112001_112_v20250918.zip"
-	landURL       = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section6/data_Y48006001_112_v20250918.zip"
-	healthcareURL = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section33/data_Y48018000_112_v20250918.zip"
-	educationURL  = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section34/data_Y48015001_112_v20250918.zip"
-	housingURL    = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section37/data_Y48010001_112_v20250918.zip"
-	salaryURL     = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section32/data_Y48423007_112_v20250918.zip"
-	ageSexURL     = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112014_112_v20250918.zip"
-	arrivalURL    = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112021_112_v20250918.zip"
-	departureURL  = "https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/indicators/section31/data_Y48112022_112_v20250918.zip"
-)
+type YadiskRosstatParser struct{}
 
-type YadiskParser struct{}
-
-func NewYadiskParser() *YadiskParser {
-	return &YadiskParser{}
+func NewYadiskRosstatParser() *YadiskRosstatParser {
+	return &YadiskRosstatParser{}
 }
 
-func (p *YadiskParser) Parse(ctx context.Context) (*abstract.ParseResult, error) {
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
-	}
-
-	// Создаём менеджер карты записей
+func (p *YadiskRosstatParser) Parse(ctx context.Context) (model.RosstatParsedSlice, error) {
+	cfg := config.NewConfig()
 	manager := merge.NewRecordMapManager()
 
-	// 1. Загружаем население
-	if err := p.loadPopulation(ctx, manager); err != nil {
+	if err := p.loadPopulation(ctx, manager, cfg.PopulationURL); err != nil {
 		return nil, fmt.Errorf("population load failed: %w", err)
 	}
 
-	// 2. Загружаем рождения и смерти
-	if err := p.loadBirths(ctx, manager); err != nil {
+	if err := p.loadBirths(ctx, manager, cfg.BirthURL); err != nil {
 		return nil, fmt.Errorf("births load failed: %w", err)
 	}
-	if err := p.loadDeaths(ctx, manager); err != nil {
+	if err := p.loadDeaths(ctx, manager, cfg.DeathURL); err != nil {
 		return nil, fmt.Errorf("deaths load failed: %w", err)
 	}
 
-	// 3. Параллельная загрузка остальных показателей
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		return p.loadMultipleParallel(ctx, manager)
+		return p.loadLandArea(ctx, manager, cfg.LandAreaURL)
 	})
 
 	g.Go(func() error {
-		return p.loadArrival(ctx, manager)
+		return p.loadHealthcare(ctx, manager, cfg.MedicialFacilitiesURL)
 	})
 
 	g.Go(func() error {
-		return p.loadDeparture(ctx, manager)
+		return p.loadEducation(ctx, manager, cfg.SchoolsURL)
+	})
+
+	g.Go(func() error {
+		return p.loadHousing(ctx, manager, cfg.HousingCommissionedURL)
+	})
+
+	g.Go(func() error {
+		return p.loadSalary(ctx, manager, cfg.AverageSalaryURL)
+	})
+
+	g.Go(func() error {
+		return p.loadAgeSex(ctx, manager, cfg.MaleFemaleAgeURL)
+	})
+
+	g.Go(func() error {
+		return p.loadArrival(ctx, manager, cfg.ArrivalURL)
+	})
+
+	g.Go(func() error {
+		return p.loadDeparture(ctx, manager, cfg.DepartureURL)
 	})
 
 	if err := g.Wait(); err != nil {
 		return nil, fmt.Errorf("parallel loading failed: %w", err)
 	}
 
-	// 4. Проверка контекста
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 
-	// 5. Возвращаем результат
-	return &abstract.ParseResult{
-		Records: manager.GetRecords(),
-	}, nil
+	return manager.GetRecords(), nil
 }
 
-// loadPopulation загружает численность населения
-func (p *YadiskParser) loadPopulation(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadPopulation(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, populationURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("population download error: %w", err)
 	}
-	defer downloader.CleanupTemp(file)
 
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 
-	populationParser := parser.NewPopulationParser()
+	populationParser := extractor.NewPopulationParser()
 	records, err := populationParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("population parse error: %w", err)
 	}
+	downloader.CleanupTemp(file)
 
 	for _, r := range records {
 		manager.SetPopulation(r.Oktmo, r.Year, int(r.Value))
@@ -121,14 +113,14 @@ func (p *YadiskParser) loadPopulation(ctx context.Context, manager *merge.Record
 }
 
 // loadBirths загружает число родившихся
-func (p *YadiskParser) loadBirths(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadBirths(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, birthsURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("births download error: %w", err)
 	}
@@ -138,7 +130,7 @@ func (p *YadiskParser) loadBirths(ctx context.Context, manager *merge.RecordMapM
 		return err
 	}
 
-	birthDeathParser := parser.NewBirthDeathParser()
+	birthDeathParser := extractor.NewBirthDeathParser()
 	records, err := birthDeathParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("births parse error: %w", err)
@@ -152,14 +144,14 @@ func (p *YadiskParser) loadBirths(ctx context.Context, manager *merge.RecordMapM
 }
 
 // loadDeaths загружает число умерших
-func (p *YadiskParser) loadDeaths(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadDeaths(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, deathsURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("deaths download error: %w", err)
 	}
@@ -169,7 +161,7 @@ func (p *YadiskParser) loadDeaths(ctx context.Context, manager *merge.RecordMapM
 		return err
 	}
 
-	birthDeathParser := parser.NewBirthDeathParser()
+	birthDeathParser := extractor.NewBirthDeathParser()
 	records, err := birthDeathParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("deaths parse error: %w", err)
@@ -182,49 +174,15 @@ func (p *YadiskParser) loadDeaths(ctx context.Context, manager *merge.RecordMapM
 	return nil
 }
 
-// loadMultipleParallel загружает несколько показателей параллельно
-func (p *YadiskParser) loadMultipleParallel(ctx context.Context, manager *merge.RecordMapManager) error {
-	type task struct {
-		name string
-		fn   func(context.Context, *merge.RecordMapManager) error
-	}
-
-	tasks := []task{
-		{"land_area", p.loadLandArea},
-		{"healthcare", p.loadHealthcare},
-		{"education", p.loadEducation},
-		{"housing", p.loadHousing},
-		{"salary", p.loadSalary},
-		{"age_sex", p.loadAgeSex},
-	}
-
-	g, ctx := errgroup.WithContext(ctx)
-
-	for _, t := range tasks {
-		task := t
-		g.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-			}
-			fmt.Printf("  Loading %s...\n", task.name)
-			return task.fn(ctx, manager)
-		})
-	}
-
-	return g.Wait()
-}
-
 // loadLandArea загружает площадь территории
-func (p *YadiskParser) loadLandArea(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadLandArea(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, landURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("land download error: %w", err)
 	}
@@ -234,7 +192,7 @@ func (p *YadiskParser) loadLandArea(ctx context.Context, manager *merge.RecordMa
 		return err
 	}
 
-	landParser := parser.NewLandParser()
+	landParser := extractor.NewLandParser()
 	records, err := landParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("land parse error: %w", err)
@@ -251,14 +209,14 @@ func (p *YadiskParser) loadLandArea(ctx context.Context, manager *merge.RecordMa
 }
 
 // loadHealthcare загружает количество медучреждений
-func (p *YadiskParser) loadHealthcare(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadHealthcare(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, healthcareURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("healthcare download error: %w", err)
 	}
@@ -268,7 +226,7 @@ func (p *YadiskParser) loadHealthcare(ctx context.Context, manager *merge.Record
 		return err
 	}
 
-	healthcareParser := parser.NewHealthcareParser()
+	healthcareParser := extractor.NewHealthcareParser()
 	records, err := healthcareParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("healthcare parse error: %w", err)
@@ -285,14 +243,14 @@ func (p *YadiskParser) loadHealthcare(ctx context.Context, manager *merge.Record
 }
 
 // loadEducation загружает количество школ
-func (p *YadiskParser) loadEducation(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadEducation(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, educationURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("education download error: %w", err)
 	}
@@ -302,7 +260,7 @@ func (p *YadiskParser) loadEducation(ctx context.Context, manager *merge.RecordM
 		return err
 	}
 
-	educationParser := parser.NewEducationParser()
+	educationParser := extractor.NewEducationParser()
 	records, err := educationParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("education parse error: %w", err)
@@ -319,14 +277,14 @@ func (p *YadiskParser) loadEducation(ctx context.Context, manager *merge.RecordM
 }
 
 // loadHousing загружает введённое жильё
-func (p *YadiskParser) loadHousing(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadHousing(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, housingURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("housing download error: %w", err)
 	}
@@ -336,7 +294,7 @@ func (p *YadiskParser) loadHousing(ctx context.Context, manager *merge.RecordMap
 		return err
 	}
 
-	housingParser := parser.NewHousingParser()
+	housingParser := extractor.NewHousingParser()
 	records, err := housingParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("housing parse error: %w", err)
@@ -353,14 +311,14 @@ func (p *YadiskParser) loadHousing(ctx context.Context, manager *merge.RecordMap
 }
 
 // loadSalary загружает среднюю зарплату
-func (p *YadiskParser) loadSalary(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadSalary(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, salaryURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("salary download error: %w", err)
 	}
@@ -370,7 +328,7 @@ func (p *YadiskParser) loadSalary(ctx context.Context, manager *merge.RecordMapM
 		return err
 	}
 
-	salaryParser := parser.NewSalaryParser()
+	salaryParser := extractor.NewSalaryParser()
 	records, err := salaryParser.Parse(ctx, file)
 	if err != nil {
 		return fmt.Errorf("salary parse error: %w", err)
@@ -387,14 +345,14 @@ func (p *YadiskParser) loadSalary(ctx context.Context, manager *merge.RecordMapM
 }
 
 // loadAgeSex загружает половозрастную структуру
-func (p *YadiskParser) loadAgeSex(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadAgeSex(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	file, err := downloader.DownloadAndUnzip(ctx, ageSexURL)
+	file, err := downloader.DownloadAndUnzip(ctx, url)
 	if err != nil {
 		return fmt.Errorf("agesex download error: %w", err)
 	}
@@ -404,7 +362,7 @@ func (p *YadiskParser) loadAgeSex(ctx context.Context, manager *merge.RecordMapM
 		return err
 	}
 
-	ageSexParser := parser.NewAgeSexParser()
+	ageSexParser := extractor.NewAgeSexParser()
 	records, err := ageSexParser.ParseAgeSex(ctx, file)
 	if err != nil {
 		return fmt.Errorf("agesex parse error: %w", err)
@@ -436,7 +394,7 @@ func (p *YadiskParser) loadAgeSex(ctx context.Context, manager *merge.RecordMapM
 }
 
 // loadArrival загружает прибывших
-func (p *YadiskParser) loadArrival(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadArrival(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -444,13 +402,13 @@ func (p *YadiskParser) loadArrival(ctx context.Context, manager *merge.RecordMap
 	}
 
 	fmt.Println("Loading arrival data...")
-	files, err := downloader.DownloadAndUnzipAll(ctx, arrivalURL)
+	files, err := downloader.DownloadAndUnzipAll(ctx, url)
 	if err != nil {
 		return fmt.Errorf("arrival download error: %w", err)
 	}
 	defer downloader.CleanupTempAll(filepath.Dir(files[0]))
 
-	migrationParser := parser.NewMigrationParser()
+	migrationParser := extractor.NewMigrationParser()
 	var allRecords []downloader.MigrationRecord
 
 	for _, file := range files {
@@ -482,7 +440,7 @@ func (p *YadiskParser) loadArrival(ctx context.Context, manager *merge.RecordMap
 }
 
 // loadDeparture загружает убывших
-func (p *YadiskParser) loadDeparture(ctx context.Context, manager *merge.RecordMapManager) error {
+func (p *YadiskRosstatParser) loadDeparture(ctx context.Context, manager *merge.RecordMapManager, url string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -490,13 +448,13 @@ func (p *YadiskParser) loadDeparture(ctx context.Context, manager *merge.RecordM
 	}
 
 	fmt.Println("Loading departure data...")
-	files, err := downloader.DownloadAndUnzipAll(ctx, departureURL)
+	files, err := downloader.DownloadAndUnzipAll(ctx, url)
 	if err != nil {
 		return fmt.Errorf("departure download error: %w", err)
 	}
 	defer downloader.CleanupTempAll(filepath.Dir(files[0]))
 
-	migrationParser := parser.NewMigrationParser()
+	migrationParser := extractor.NewMigrationParser()
 	var allRecords []downloader.MigrationRecord
 
 	for _, file := range files {

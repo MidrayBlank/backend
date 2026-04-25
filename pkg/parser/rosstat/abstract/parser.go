@@ -1,14 +1,11 @@
 package abstract
 
 import (
-	"backend/pkg/parser/rosstat/yadisk/model"
 	"context"
+
+	"backend/pkg/parser/rosstat/yadisk/model"
 )
 
-type ParseResult struct {
-	Records []*model.DemographyRecord
-}
-
 type IRosstatParser interface {
-	Parse(ctx context.Context) (*ParseResult, error)
+	Parse(ctx context.Context) ([]*model.RosstatParsed, error)
 }

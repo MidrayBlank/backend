@@ -1,16 +1,19 @@
-package yadisk
+package yadisk_test
 
 import (
-	"backend/pkg/parser/rosstat/yadisk/downloader"
-	"backend/pkg/parser/rosstat/yadisk/parser"
 	"context"
 	"fmt"
 	"testing"
 	"time"
+
+	"backend/pkg/parser/rosstat/yadisk"
+	"backend/pkg/parser/rosstat/yadisk/config"
+	"backend/pkg/parser/rosstat/yadisk/downloader"
+	"backend/pkg/parser/rosstat/yadisk/extractor"
 )
 
-// TestYadiskParser проверяет полную работу парсера
-func TestYadiskParser(t *testing.T) {
+// TestYadiskRosstatParser проверяет полную работу парсера
+func TestYadiskRosstatParser(t *testing.T) {
 	// Пропускаем тест в коротком режиме (чтобы не тратить время при быстрых тестах)
 	if testing.Short() {
 		t.Skip("Skipping full parser test in short mode")
@@ -21,9 +24,9 @@ func TestYadiskParser(t *testing.T) {
 	defer cancel()
 
 	// Создаём парсер
-	parser := NewYadiskParser()
+	parser := yadisk.NewYadiskRosstatParser()
 
-	fmt.Println("Starting YadiskParser test...")
+	fmt.Println("Starting YadiskRosstatParser test...")
 	fmt.Println("This will take about 30-40 minutes to download all data...")
 
 	// Запускаем парсинг
@@ -33,13 +36,13 @@ func TestYadiskParser(t *testing.T) {
 	}
 
 	// Проверяем, что результат не пустой
-	if len(result.Records) == 0 {
+	if len(result) == 0 {
 		t.Error("Expected non-empty records, got 0")
 	}
 
 	// Выводим статистику
 	fmt.Printf("\n=== TEST RESULTS ===\n")
-	fmt.Printf("Total records: %d\n", len(result.Records))
+	fmt.Printf("Total records: %d\n", len(result))
 
 	// Считаем заполненность полей
 	var (
@@ -49,7 +52,7 @@ func TestYadiskParser(t *testing.T) {
 		hasLand, hasSalary, hasMedical, hasSchools, hasHousing int
 	)
 
-	for _, r := range result.Records {
+	for _, r := range result {
 		if r.PopulationAmount > 0 {
 			hasPopulation++
 		}
@@ -89,22 +92,22 @@ func TestYadiskParser(t *testing.T) {
 	}
 
 	fmt.Println("\nField coverage:")
-	fmt.Printf("  PopulationAmount:   %d / %d (%.1f%%)\n", hasPopulation, len(result.Records), float64(hasPopulation)/float64(len(result.Records))*100)
-	fmt.Printf("  BirthAmount:        %d / %d (%.1f%%)\n", hasBirths, len(result.Records), float64(hasBirths)/float64(len(result.Records))*100)
-	fmt.Printf("  DeathAmount:        %d / %d (%.1f%%)\n", hasDeaths, len(result.Records), float64(hasDeaths)/float64(len(result.Records))*100)
-	fmt.Printf("  ArrivalAmount:      %d / %d (%.1f%%)\n", hasArrival, len(result.Records), float64(hasArrival)/float64(len(result.Records))*100)
-	fmt.Printf("  DepartureAmount:    %d / %d (%.1f%%)\n", hasDeparture, len(result.Records), float64(hasDeparture)/float64(len(result.Records))*100)
-	fmt.Printf("  MaleAmount:         %d / %d (%.1f%%)\n", hasMale, len(result.Records), float64(hasMale)/float64(len(result.Records))*100)
-	fmt.Printf("  FemaleAmount:       %d / %d (%.1f%%)\n", hasFemale, len(result.Records), float64(hasFemale)/float64(len(result.Records))*100)
-	fmt.Printf("  LandArea:           %d / %d (%.1f%%)\n", hasLand, len(result.Records), float64(hasLand)/float64(len(result.Records))*100)
-	fmt.Printf("  AvgSalary:          %d / %d (%.1f%%)\n", hasSalary, len(result.Records), float64(hasSalary)/float64(len(result.Records))*100)
-	fmt.Printf("  MedicalFacilities:  %d / %d (%.1f%%)\n", hasMedical, len(result.Records), float64(hasMedical)/float64(len(result.Records))*100)
-	fmt.Printf("  SchoolsCount:       %d / %d (%.1f%%)\n", hasSchools, len(result.Records), float64(hasSchools)/float64(len(result.Records))*100)
-	fmt.Printf("  HousingCommissioned:%d / %d (%.1f%%)\n", hasHousing, len(result.Records), float64(hasHousing)/float64(len(result.Records))*100)
+	fmt.Printf("  PopulationAmount:   %d / %d (%.1f%%)\n", hasPopulation, len(result), float64(hasPopulation)/float64(len(result))*100)
+	fmt.Printf("  BirthAmount:        %d / %d (%.1f%%)\n", hasBirths, len(result), float64(hasBirths)/float64(len(result))*100)
+	fmt.Printf("  DeathAmount:        %d / %d (%.1f%%)\n", hasDeaths, len(result), float64(hasDeaths)/float64(len(result))*100)
+	fmt.Printf("  ArrivalAmount:      %d / %d (%.1f%%)\n", hasArrival, len(result), float64(hasArrival)/float64(len(result))*100)
+	fmt.Printf("  DepartureAmount:    %d / %d (%.1f%%)\n", hasDeparture, len(result), float64(hasDeparture)/float64(len(result))*100)
+	fmt.Printf("  MaleAmount:         %d / %d (%.1f%%)\n", hasMale, len(result), float64(hasMale)/float64(len(result))*100)
+	fmt.Printf("  FemaleAmount:       %d / %d (%.1f%%)\n", hasFemale, len(result), float64(hasFemale)/float64(len(result))*100)
+	fmt.Printf("  LandArea:           %d / %d (%.1f%%)\n", hasLand, len(result), float64(hasLand)/float64(len(result))*100)
+	fmt.Printf("  AvgSalary:          %d / %d (%.1f%%)\n", hasSalary, len(result), float64(hasSalary)/float64(len(result))*100)
+	fmt.Printf("  MedicalFacilities:  %d / %d (%.1f%%)\n", hasMedical, len(result), float64(hasMedical)/float64(len(result))*100)
+	fmt.Printf("  SchoolsCount:       %d / %d (%.1f%%)\n", hasSchools, len(result), float64(hasSchools)/float64(len(result))*100)
+	fmt.Printf("  HousingCommissioned:%d / %d (%.1f%%)\n", hasHousing, len(result), float64(hasHousing)/float64(len(result))*100)
 
 	// Показываем примеры
 	fmt.Println("\nSample records (first 5):")
-	for i, r := range result.Records {
+	for i, r := range result {
 		if i >= 5 {
 			break
 		}
@@ -137,20 +140,20 @@ func TestYadiskParser(t *testing.T) {
 }
 
 func TestQuickPopulation(t *testing.T) {
+	cfg := config.NewConfig()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
 	fmt.Println("Testing population download and parse...")
 
-	// Скачиваем файл населения
-	file, err := downloader.DownloadAndUnzip(ctx, populationURL)
+	file, err := downloader.DownloadAndUnzip(ctx, cfg.PopulationURL)
 	if err != nil {
 		t.Fatalf("Download error: %v", err)
 	}
 	defer downloader.CleanupTemp(file)
 
-	// Парсим
-	populationParser := parser.NewPopulationParser()
+	populationParser := extractor.NewPopulationParser()
 	records, err := populationParser.Parse(ctx, file)
 	if err != nil {
 		t.Fatalf("Parse error: %v", err)
@@ -158,7 +161,6 @@ func TestQuickPopulation(t *testing.T) {
 
 	fmt.Printf("✅ Success! Parsed %d population records\n", len(records))
 
-	// Показываем первые 5 записей
 	fmt.Println("\nSample records:")
 	for i, r := range records {
 		if i >= 5 {
