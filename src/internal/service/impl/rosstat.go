@@ -43,18 +43,18 @@ func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatLis
 		return nil, err
 	}
 
-	agesMap := make(map[int][]*domain.RosstatByAge)
-	for _, rosstatAge := range rosstatAges {
-		agesMap[rosstatAge.RosstatID] = append(agesMap[rosstatAge.RosstatID], rosstatAge)
-	}
-
-	return service.toRosstatList(rosstatByYears, agesMap)
+	return service.toRosstatList(rosstatByYears, rosstatAges)
 }
 
 func (service *RosstatService) toRosstatList(
 	rosstatByYears []*domain.Rosstat,
-	agesMap map[int][]*domain.RosstatByAge,
+	rosstatAges []*domain.RosstatByAge,
 ) (domain.RosstatList, error) {
+
+	agesMap := make(map[int][]*domain.RosstatByAge)
+	for _, rosstatAge := range rosstatAges {
+		agesMap[rosstatAge.RosstatID] = append(agesMap[rosstatAge.RosstatID], rosstatAge)
+	}
 
 	result := make([]domain.RosstatByYear, len(rosstatByYears))
 
