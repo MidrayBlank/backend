@@ -2,13 +2,13 @@ package report
 
 import "backend/src/pkg/report/population_growth/domain"
 
-type PopulationGrowthCalculator struct{}
+type PopulationGrowthReportCompiler struct{}
 
-func NewPopulationGrowthCalculator() *PopulationGrowthCalculator {
-	return &PopulationGrowthCalculator{}
+func NewPopulationGrowthReportCompiler() *PopulationGrowthReportCompiler {
+	return &PopulationGrowthReportCompiler{}
 }
 
-func (c *PopulationGrowthCalculator) CompileReport(data []*domain.PopulationGrowthParams) []*domain.PopulationGrowthReport {
+func (c *PopulationGrowthReportCompiler) Compile(data []*domain.PopulationGrowthParams) []*domain.PopulationGrowthReport {
 	if len(data) == 0 {
 		return []*domain.PopulationGrowthReport{}
 	}

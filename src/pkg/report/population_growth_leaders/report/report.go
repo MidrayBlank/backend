@@ -6,13 +6,13 @@ import (
 	"sort"
 )
 
-type GrowthLeadersCalculator struct{}
+type GrowthLeadersReportCompiler struct{}
 
-func NewGrowthLeadersCalculator() *GrowthLeadersCalculator {
-	return &GrowthLeadersCalculator{}
+func NewGrowthLeadersReportCompiler() *GrowthLeadersReportCompiler {
+	return &GrowthLeadersReportCompiler{}
 }
 
-func (c *GrowthLeadersCalculator) CompileReport(data []*domain.GrowthLeadersParams) (topGrowth []*domain.GrowthLeadersReport, topDecline []*domain.GrowthLeadersReport) {
+func (c *GrowthLeadersReportCompiler) Compile(data []*domain.GrowthLeadersParams) (topGrowth []*domain.GrowthLeadersReport, topDecline []*domain.GrowthLeadersReport) {
 	if len(data) == 0 {
 		return []*domain.GrowthLeadersReport{}, []*domain.GrowthLeadersReport{}
 	}
@@ -36,19 +36,19 @@ func (c *GrowthLeadersCalculator) CompileReport(data []*domain.GrowthLeadersPara
 
 	limit := data[0].Limit
 
-	topGrowth = c.getTopByGrowth(items, limit, false)
+	topGrowth = c.getTopGrowth(items, limit, false)
 
-	topDecline = c.getTopByGrowth(items, limit, true)
+	topDecline = c.getTopGrowth(items, limit, true)
 
 	return topGrowth, topDecline
 }
 
-func (c *GrowthLeadersCalculator) getTopByGrowth(items []dto.GrowthItem, limit int, flag bool) []*domain.GrowthLeadersReport {
+func (c *GrowthLeadersReportCompiler) getTopGrowth(items []dto.GrowthItem, limit int, ascending bool) []*domain.GrowthLeadersReport {
 	sorted := make([]dto.GrowthItem, len(items))
 	copy(sorted, items)
 
 	sort.Slice(sorted, func(i, j int) bool {
-		if flag {
+		if ascending {
 			return sorted[i].GrowthPct < sorted[j].GrowthPct
 		}
 		return sorted[i].GrowthPct > sorted[j].GrowthPct

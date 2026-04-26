@@ -2,13 +2,13 @@ package report
 
 import "backend/src/pkg/report/population_density/domain"
 
-type PopulationDensityCalculator struct{}
+type PopulationDensityReportCompiler struct{}
 
-func NewPopulationDensityCalculator() *PopulationDensityCalculator {
-	return &PopulationDensityCalculator{}
+func NewPopulationDensityReportCompiler() *PopulationDensityReportCompiler {
+	return &PopulationDensityReportCompiler{}
 }
 
-func (c *PopulationDensityCalculator) CompileReport(data []*domain.PopulationDensityParams) []*domain.PopulationDensityReport {
+func (c *PopulationDensityReportCompiler) Compile(data []*domain.PopulationDensityParams) []*domain.PopulationDensityReport {
 	if len(data) == 0 {
 		return []*domain.PopulationDensityReport{}
 	}

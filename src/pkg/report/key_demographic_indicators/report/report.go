@@ -2,13 +2,13 @@ package report
 
 import "backend/src/pkg/report/key_demographic_indicators/domain"
 
-type DemographicCalculator struct{}
+type DemographicReportCompiler struct{}
 
-func NewDemographicCalculator() *DemographicCalculator {
-	return &DemographicCalculator{}
+func NewDemographicReportCompiler() *DemographicReportCompiler {
+	return &DemographicReportCompiler{}
 }
 
-func (c *DemographicCalculator) CompileReport(data []*domain.DemographicParams) []*domain.DemographicReport {
+func (c *DemographicReportCompiler) Compile(data []*domain.DemographicParams) []*domain.DemographicReport {
 	if len(data) == 0 {
 		return []*domain.DemographicReport{}
 	}
