@@ -7,7 +7,7 @@ import (
 	service "backend/src/internal/service/abstract"
 )
 
-func GetRosstatInfo(ctx context.HandlerContext, params dto.RosstatParams, rosstatService service.IRosstatService) (dto.RosstatResponse, error) {
+func GetRosstatHandler(ctx context.HandlerContext, params dto.RosstatParams, rosstatService service.IRosstatService) (dto.RosstatResponse, error) {
 	rosstatList, err := rosstatService.GetRosstatByCodes(params.Codes)
 	if err != nil {
 		return nil, err
