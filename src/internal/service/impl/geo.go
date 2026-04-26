@@ -2,6 +2,7 @@ package impl
 
 import (
 	connection "backend/src/internal/db/abstract"
+	"backend/src/internal/domain"
 	repository "backend/src/internal/repository/abstract"
 )
 
@@ -15,4 +16,20 @@ func NewGeoService(conn connection.IDBConnection, geoRepo repository.IGeoReposit
 		conn:    conn,
 		geoRepo: geoRepo,
 	}
+}
+
+func (service *GeoService) GetGeoByCodes(codes []int) ([]domain.Geo, error) {
+	geoList, err := service.geoRepo.GetGeoByCodes(service.conn, codes)
+	if err != nil {
+		return nil, err
+	}
+	return toGeoSlice(geoList), nil
+}
+
+func toGeoSlice(geoList []*domain.Geo) []domain.Geo {
+	result := make([]domain.Geo, len(geoList))
+	for i, geo := range geoList {
+		result[i] = *geo
+	}
+	return result
 }
