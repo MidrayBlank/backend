@@ -18,12 +18,12 @@ func GetRosstatHandler(ctx context.HandlerContext, params dto.RosstatParams, ros
 		codeMap[data.Code] = append(codeMap[data.Code], data)
 	}
 
-	rosstatresponse := buildResponse(codeMap, params.Fields)
+	rosstatresponse := buildRosstatResponse(codeMap, params.Fields)
 
 	return rosstatresponse, nil
 }
 
-func buildResponse(codeMap map[int][]domain.RosstatByYear, fields []string) dto.RosstatResponse {
+func buildRosstatResponse(codeMap map[int][]domain.RosstatByYear, fields []string) dto.RosstatResponse {
 	result := make([]dto.Rosstat, 0, len(codeMap))
 	for code, dataList := range codeMap {
 		item := dto.Rosstat{
