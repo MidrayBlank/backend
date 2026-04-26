@@ -5,5 +5,5 @@ import (
 )
 
 type IRosstatService interface {
-	GetRosstatByCodes(codes []int) (domain.RosstatDataList, error)
+	GetRosstatByCodes(codes []int) (domain.RosstatList, error)
 }
