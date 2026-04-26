@@ -2,7 +2,7 @@ package domain
 
 type Rosstat struct {
 	ID                  int
-	Code                string
+	Code                int
 	Year                int
 	PopulationAmount    int
 	BirthAmount         *int
@@ -17,3 +17,30 @@ type Rosstat struct {
 	SchoolsCount        *int
 	HousingCommissioned *float64
 }
+
+type RosstatByYear struct {
+	Code                int
+	Year                int
+	PopulationAmount    int
+	BirthAmount         *int
+	DeathAmount         *int
+	ArrivalAmount       *int
+	DepartureAmount     *int
+	MaleAmount          *int
+	FemaleAmount        *int
+	LandArea            *float64
+	AvgSalary           *float64
+	MedicalFacilities   *int
+	SchoolsCount        *int
+	HousingCommissioned *float64
+	AgeData             []RosstatByAge
+}
+
+type RosstatByAge struct {
+	RosstatID    int
+	Age          int
+	MaleAmount   int
+	FemaleAmount int
+}
+
+type RosstatList []RosstatByYear

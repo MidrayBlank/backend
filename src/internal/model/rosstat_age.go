@@ -11,18 +11,14 @@ type RosstatAge struct {
 	FemaleAmount int `gorm:"column:female_amount;type:int;not null"`
 }
 
-func (RosstatAge) TableName() string {
-	return "rosstat_age"
+func (modelObj *RosstatAge) ToDomain() (*domain.RosstatByAge, error) {
+	return ToDomain[RosstatAge, domain.RosstatByAge](modelObj)
 }
 
-func (modelObj *RosstatAge) ToDomain() (*domain.RosstatAge, error) {
-	return ToDomain[RosstatAge, domain.RosstatAge](modelObj)
+func (modelObj *RosstatAge) ToModel(domainObj *domain.RosstatByAge) (*RosstatAge, error) {
+	return ToModel[RosstatAge, domain.RosstatByAge](domainObj)
 }
 
-func (modelObj *RosstatAge) ToModel(domainObj *domain.RosstatAge) (*RosstatAge, error) {
-	return ToModel[RosstatAge, domain.RosstatAge](domainObj)
-}
-
-func (modelObj RosstatAge) ToDomainSlice(modelObjs []RosstatAge) ([]*domain.RosstatAge, error) {
-	return ToDomainSlice[RosstatAge, domain.RosstatAge](modelObjs)
+func (modelObj RosstatAge) ToDomainSlice(modelObjs []RosstatAge) ([]*domain.RosstatByAge, error) {
+	return ToDomainSlice[RosstatAge, domain.RosstatByAge](modelObjs)
 }
