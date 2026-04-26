@@ -36,4 +36,11 @@ type RosstatByYear struct {
 	AgeData             []RosstatByAge
 }
 
+type RosstatByAge struct {
+	RosstatID    int
+	Age          int
+	MaleAmount   int
+	FemaleAmount int
+}
+
 type RosstatList []RosstatByYear
