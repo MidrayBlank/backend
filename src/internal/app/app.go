@@ -25,7 +25,7 @@ func Run() {
 	rosstatAgeRepo := rimpl.NewRosstatAgeRepository()
 
 	serviceProvider := provider.NewServiceProvider()
-	serviceProvider.Register((*sabst.IRosstatService)(nil), simpl.NewRosstatService(conn))
+	serviceProvider.Register((*sabst.IRosstatService)(nil), simpl.NewRosstatService(conn, rosstatRepo, rosstatAgeRepo))
 
 	app := fiber.New(fiber.Config{
 		EnableSplittingOnParsers: true,
