@@ -19,6 +19,7 @@ type RosstatData struct {
 }
 
 type RosstatAgeData struct {
+	RosstatID    int
 	Age          int
 	MaleAmount   int
 	FemaleAmount int
