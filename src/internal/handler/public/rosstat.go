@@ -7,13 +7,13 @@ import (
 )
 
 func GetRosstatInfo(ctx context.HandlerContext, params dto.RosstatParams, rosstatService service.IRosstatService) (dto.RosstatResponse, error) {
-	populationList := rosstatService.GetRosstatByCodes(params.Codes)
+	rosstatList := rosstatService.GetRosstatByCodes(params.Codes)
 
 	for _, field := range params.Fields {
 		if field == "population" {
-			result := make([]dto.RosstatGeo, len(populationList))
+			result := make([]dto.RosstatGeo, len(rosstatList))
 
-			for index, value := range populationList {
+			for index, value := range rosstatList {
 				result[index] = dto.RosstatGeo{Code: value.Code, Population: value.Population}
 			}
 
