@@ -13,7 +13,7 @@ func GetRosstatInfo(ctx context.HandlerContext, params dto.RosstatParams, rossta
 		return nil, err
 	}
 
-	codeMap := make(map[int][]domain.RosstatData)
+	codeMap := make(map[int][]domain.RosstatByYear)
 	for _, data := range rosstatList {
 		codeMap[data.Code] = append(codeMap[data.Code], data)
 	}
@@ -23,7 +23,7 @@ func GetRosstatInfo(ctx context.HandlerContext, params dto.RosstatParams, rossta
 	return rosstatresponse, nil
 }
 
-func buildResponse(codeMap map[int][]domain.RosstatData, fields []string) dto.RosstatResponse {
+func buildResponse(codeMap map[int][]domain.RosstatByYear, fields []string) dto.RosstatResponse {
 	result := make([]dto.Rosstat, 0, len(codeMap))
 	for code, dataList := range codeMap {
 		item := dto.Rosstat{
@@ -39,7 +39,7 @@ func buildResponse(codeMap map[int][]domain.RosstatData, fields []string) dto.Ro
 	return result
 }
 
-func toRosstatByYear(data domain.RosstatData, fields []string) dto.RosstatByYear {
+func toRosstatByYear(data domain.RosstatByYear, fields []string) dto.RosstatByYear {
 	byYear := dto.RosstatByYear{}
 
 	for _, field := range fields {

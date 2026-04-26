@@ -1,6 +1,6 @@
 package domain
 
-type RosstatData struct {
+type RosstatByYear struct {
 	Code                int
 	Year                int
 	PopulationAmount    int
@@ -25,4 +25,4 @@ type RosstatByAge struct {
 	FemaleAmount int
 }
 
-type RosstatList []RosstatData
+type RosstatList []RosstatByYear

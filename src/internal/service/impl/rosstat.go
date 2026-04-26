@@ -72,10 +72,10 @@ func (service *RosstatService) toRosstatDataList(
 	agesMap map[int][]domain.RosstatByAge,
 ) (domain.RosstatList, error) {
 
-	result := make([]domain.RosstatData, len(rosstatInfo))
+	result := make([]domain.RosstatByYear, len(rosstatInfo))
 
 	for i, info := range rosstatInfo {
-		var data domain.RosstatData
+		var data domain.RosstatByYear
 		if err := copier.Copy(&data, info); err != nil {
 			return nil, err
 		}
