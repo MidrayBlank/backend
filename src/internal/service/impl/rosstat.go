@@ -28,13 +28,13 @@ func NewRosstatService(
 }
 
 func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatList, error) {
-	rosstatInfos, err := service.rosstatRepo.GetRosstatByCodes(service.conn, codes)
+	rosstatByYears, err := service.rosstatRepo.GetRosstatByCodes(service.conn, codes)
 	if err != nil {
 		return nil, err
 	}
 
-	rosstatIDs := make([]int, len(rosstatInfos))
-	for i, rosstatInfo := range rosstatInfos {
+	rosstatIDs := make([]int, len(rosstatByYears))
+	for i, rosstatInfo := range rosstatByYears {
 		rosstatIDs[i] = rosstatInfo.ID
 	}
 
@@ -43,44 +43,33 @@ func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatLis
 		return nil, err
 	}
 
-	rosstatAgesData, err := service.toRosstatAgeData(rosstatAges)
-	if err != nil {
-		return nil, err
+	agesMap := make(map[int][]*domain.RosstatByAge)
+	for _, rosstatAge := range rosstatAges {
+		agesMap[rosstatAge.RosstatID] = append(agesMap[rosstatAge.RosstatID], rosstatAge)
 	}
 
-	agesMap := make(map[int][]domain.RosstatByAge)
-	for _, rosstatAgeData := range rosstatAgesData {
-		agesMap[rosstatAgeData.RosstatID] = append(agesMap[rosstatAgeData.RosstatID], rosstatAgeData)
-	}
-
-	return service.toRosstatDataList(rosstatInfos, agesMap)
+	return service.toRosstatList(rosstatByYears, agesMap)
 }
 
-func (service *RosstatService) toRosstatAgeData(rosstatAges []*domain.RosstatAge) ([]domain.RosstatByAge, error) {
-	result := make([]domain.RosstatByAge, len(rosstatAges))
-
-	for i, rosstatAge := range rosstatAges {
-		if err := copier.Copy(&result[i], rosstatAge); err != nil {
-			return nil, err
-		}
-	}
-	return result, nil
-}
-
-func (service *RosstatService) toRosstatDataList(
-	rosstatInfo []*domain.Rosstat,
-	agesMap map[int][]domain.RosstatByAge,
+func (service *RosstatService) toRosstatList(
+	rosstatByYears []*domain.Rosstat,
+	agesMap map[int][]*domain.RosstatByAge,
 ) (domain.RosstatList, error) {
 
-	result := make([]domain.RosstatByYear, len(rosstatInfo))
+	result := make([]domain.RosstatByYear, len(rosstatByYears))
 
-	for i, info := range rosstatInfo {
+	for i, info := range rosstatByYears {
 		var data domain.RosstatByYear
 		if err := copier.Copy(&data, info); err != nil {
 			return nil, err
 		}
 
-		data.AgeData = agesMap[info.ID]
+		ageDataList := make([]domain.RosstatByAge, len(agesMap[info.ID]))
+		for j, age := range agesMap[info.ID] {
+			ageDataList[j] = *age
+		}
+
+		data.AgeData = ageDataList
 		result[i] = data
 	}
 
