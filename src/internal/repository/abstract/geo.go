@@ -6,6 +6,6 @@ import (
 )
 
 type IGeoRepository interface {
-	Upsert(conn abstract.IDBConnection) error
+	Upsert(conn abstract.IDBConnection, geo *domain.Geo) error
 	GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]*domain.Geo, error)
 }
