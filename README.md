@@ -30,4 +30,4 @@ DATABASE_HOST=db
 DATABASE_PORT=5432
 ```
 
-- PS если что DATABASE*HOST и DATABASE_PORT *не менять\_, это путь внутри docker по сети-docker, а порт всегда такой будет внутри контейнера
+- PS если что `DATABASE_HOST` и `DATABASE_PORT` не менять, это путь внутри docker по сети-docker, а порт всегда такой будет внутри контейнера
