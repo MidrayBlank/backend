@@ -31,7 +31,8 @@ func Run() {
 
 	app.Get("/ping", health.PingHandler)
 
-	app.Get("/api/v1/rosstat", middleware.Adapt(public.RosstatHandler, serviceProvider))
+	app.Get("/api/v1/rosstat", middleware.Adapt(public.GetRosstatInfo, serviceProvider))
+	app.Get("/api/v1/geo", middleware.Adapt(public.GetHandlerInfo, serviceProvider))
 
 	app.Get("/openapi.yaml", api.OpenapiYamlHandler)
 	app.Get("/api/*", api.ApiHandler())
