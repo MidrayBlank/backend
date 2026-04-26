@@ -96,7 +96,7 @@ func toRosstatByAge(age domain.RosstatByAge) dto.RosstatByAge {
 	}
 }
 
-func toRosstatByAgeSlice(ageData []domain.RosstatAgeData) []dto.RosstatByAge {
+func toRosstatByAgeSlice(ageData []domain.RosstatByAge) []dto.RosstatByAge {
 	result := make([]dto.RosstatByAge, len(ageData))
 	for i, age := range ageData {
 		result[i] = toRosstatByAge(age)

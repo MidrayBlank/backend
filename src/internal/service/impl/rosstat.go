@@ -27,7 +27,7 @@ func NewRosstatService(
 	}
 }
 
-func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatDataList, error) {
+func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatList, error) {
 	rosstatInfos, err := service.rosstatRepo.GetRosstatByCodes(service.conn, codes)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (service *RosstatService) toRosstatAgeData(rosstatAges []*domain.RosstatAge
 func (service *RosstatService) toRosstatDataList(
 	rosstatInfo []*domain.Rosstat,
 	agesMap map[int][]domain.RosstatByAge,
-) (domain.RosstatDataList, error) {
+) (domain.RosstatList, error) {
 
 	result := make([]domain.RosstatData, len(rosstatInfo))
 

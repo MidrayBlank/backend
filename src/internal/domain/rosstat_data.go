@@ -25,4 +25,4 @@ type RosstatByAge struct {
 	FemaleAmount int
 }
 
-type RosstatDataList []RosstatData
+type RosstatList []RosstatData
