@@ -8,3 +8,4 @@ CREATE TABLE IF NOT EXISTS midray.ai_api (
 
 -- +goose Down
 DROP TABLE IF EXISTS midray.ai_api;
+
