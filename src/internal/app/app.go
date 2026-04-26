@@ -22,11 +22,14 @@ import (
 func Run() {
 	config := config.Load()
 	conn := postgres.NewPostgresConnection(config.GetDBDSN())
+	serviceProvider := provider.NewServiceProvider()
+
 	rosstatRepo := rimpl.NewRosstatRepository()
 	rosstatAgeRepo := rimpl.NewRosstatAgeRepository()
-
-	serviceProvider := provider.NewServiceProvider()
 	serviceProvider.Register((*sabst.IRosstatService)(nil), simpl.NewRosstatService(conn, rosstatRepo, rosstatAgeRepo))
+
+	geoRepo := rimpl.NewGeoRepository()
+	serviceProvider.Register((*sabst.IGeoService)(nil), simpl.NewGeoService(conn, geoRepo))
 
 	app := fiber.New(fiber.Config{
 		EnableSplittingOnParsers: true,
@@ -36,7 +39,7 @@ func Run() {
 	app.Get("/ping", health.PingHandler)
 
 	app.Get("/api/v1/rosstat", middleware.Adapt(public.GetRosstatHandler, serviceProvider))
-	//app.Get("/api/v1/geo", middleware.Adapt(public.GetHandlerInfo, serviceProvider))
+	app.Get("/api/v1/geo", middleware.Adapt(public.GetGeoHandler, serviceProvider))
 
 	app.Get("/openapi.yaml", api.OpenapiYamlHandler)
 	app.Get("/api/*", api.ApiHandler())
