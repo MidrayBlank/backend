@@ -15,10 +15,10 @@ type RosstatData struct {
 	MedicalFacilities   *int
 	SchoolsCount        *int
 	HousingCommissioned *float64
-	AgeData             []RosstatAgeData
+	AgeData             []RosstatByAge
 }
 
-type RosstatAgeData struct {
+type RosstatByAge struct {
 	RosstatID    int
 	Age          int
 	MaleAmount   int

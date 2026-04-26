@@ -88,7 +88,7 @@ func toRosstatByYear(data domain.RosstatData, fields []string) dto.RosstatByYear
 	return byYear
 }
 
-func toRosstatByAge(age domain.RosstatAgeData) dto.RosstatByAge {
+func toRosstatByAge(age domain.RosstatByAge) dto.RosstatByAge {
 	return dto.RosstatByAge{
 		Age:    age.Age,
 		Male:   age.MaleAmount,

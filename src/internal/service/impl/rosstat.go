@@ -48,7 +48,7 @@ func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatDat
 		return nil, err
 	}
 
-	agesMap := make(map[int][]domain.RosstatAgeData)
+	agesMap := make(map[int][]domain.RosstatByAge)
 	for _, rosstatAgeData := range rosstatAgesData {
 		agesMap[rosstatAgeData.RosstatID] = append(agesMap[rosstatAgeData.RosstatID], rosstatAgeData)
 	}
@@ -56,8 +56,8 @@ func (service *RosstatService) GetRosstatByCodes(codes []int) (domain.RosstatDat
 	return service.toRosstatDataList(rosstatInfos, agesMap)
 }
 
-func (service *RosstatService) toRosstatAgeData(rosstatAges []*domain.RosstatAge) ([]domain.RosstatAgeData, error) {
-	result := make([]domain.RosstatAgeData, len(rosstatAges))
+func (service *RosstatService) toRosstatAgeData(rosstatAges []*domain.RosstatAge) ([]domain.RosstatByAge, error) {
+	result := make([]domain.RosstatByAge, len(rosstatAges))
 
 	for i, rosstatAge := range rosstatAges {
 		if err := copier.Copy(&result[i], rosstatAge); err != nil {
@@ -69,7 +69,7 @@ func (service *RosstatService) toRosstatAgeData(rosstatAges []*domain.RosstatAge
 
 func (service *RosstatService) toRosstatDataList(
 	rosstatInfo []*domain.Rosstat,
-	agesMap map[int][]domain.RosstatAgeData,
+	agesMap map[int][]domain.RosstatByAge,
 ) (domain.RosstatDataList, error) {
 
 	result := make([]domain.RosstatData, len(rosstatInfo))
