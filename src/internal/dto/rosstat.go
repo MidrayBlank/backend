@@ -12,7 +12,7 @@ type RosstatByAge struct {
 }
 
 type RosstatByYear struct {
-	Population          int            `json:"population"`
+	Population          *int           `json:"population,omitempty"`
 	Birth               *int           `json:"birth,omitempty"`
 	Death               *int           `json:"death,omitempty"`
 	Arrival             *int           `json:"arrival,omitempty"`
