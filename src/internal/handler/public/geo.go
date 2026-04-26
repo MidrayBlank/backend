@@ -7,18 +7,15 @@ import (
 	service "backend/src/internal/service/abstract"
 )
 
-func GetGeoHandler(ctx context.HandlerContext, params dto.RosstatParams, rosstatService service.IRosstatService) (dto.RosstatResponse, error) {
-	rosstatList, err := rosstatService.GetRosstatByCodes(params.Codes)
+func GetGeoHandler(ctx context.HandlerContext, geoService service.IGeoService) (dto.GeoResponse, error) {
+	geoList, err := geoService.GetGeoByCodes(nil)
 	if err != nil {
-		return nil, err
+		return dto.GeoResponse{}, err
 	}
 
-	codeMap := make(map[int][]domain.RosstatByYear)
-	for _, data := range rosstatList {
-		codeMap[data.Code] = append(codeMap[data.Code], data)
-	}
+	return buildGeoResponse(geoList)
+}
 
-	rosstatresponse := buildRosstatResponse(codeMap, params.Fields)
+func buildGeoResponse(geoList []*domain.Geo) (dto.GeoResponse, error) {
 
-	return rosstatresponse, nil
 }
