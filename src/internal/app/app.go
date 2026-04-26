@@ -10,6 +10,7 @@ import (
 	"backend/src/internal/handler/public"
 	"backend/src/internal/middleware"
 	"backend/src/internal/provider"
+	rimpl "backend/src/internal/repository/impl"
 	sabst "backend/src/internal/service/abstract"
 	simpl "backend/src/internal/service/impl"
 	"backend/src/internal/validator"
@@ -20,6 +21,8 @@ import (
 func Run() {
 	config := config.Load()
 	conn := postgres.NewPostgresConnection(config.GetDBDSN())
+	rosstatRepo := rimpl.NewRosstatRepository()
+	rosstatAgeRepo := rimpl.NewRosstatAgeRepository()
 
 	serviceProvider := provider.NewServiceProvider()
 	serviceProvider.Register((*sabst.IRosstatService)(nil), simpl.NewRosstatService(conn))
