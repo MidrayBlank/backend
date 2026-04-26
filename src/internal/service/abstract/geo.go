@@ -5,5 +5,5 @@ import (
 )
 
 type IGeoService interface {
-	GetGeoByCodes(codes []int) ([]domain.Geo, error)
+	GetGeoAll() ([]domain.Geo, error)
 }

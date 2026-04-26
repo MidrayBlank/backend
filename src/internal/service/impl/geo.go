@@ -18,8 +18,8 @@ func NewGeoService(conn connection.IDBConnection, geoRepo repository.IGeoReposit
 	}
 }
 
-func (service *GeoService) GetGeoByCodes(codes []int) ([]domain.Geo, error) {
-	geoList, err := service.geoRepo.GetGeoByCodes(service.conn, codes)
+func (service *GeoService) GetGeoAll() ([]domain.Geo, error) {
+	geoList, err := service.geoRepo.GetGeoAll(service.conn)
 	if err != nil {
 		return nil, err
 	}

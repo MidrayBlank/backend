@@ -9,7 +9,7 @@ import (
 )
 
 func GetGeoHandler(ctx context.HandlerContext, geoService service.IGeoService) (dto.GeoResponse, error) {
-	geoList, err := geoService.GetGeoByCodes(nil) // nil тк выгружаем ВСЕ geo
+	geoList, err := geoService.GetGeoAll()
 	if err != nil {
 		return dto.GeoResponse{}, err
 	}
