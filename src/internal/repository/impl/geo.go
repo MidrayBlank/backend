@@ -33,12 +33,11 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 
 }
 
-func (r *GeoRepository) GetGeoByCodes(conn abstract.IDBConnection, codes []int) ([]*domain.Geo, error) {
+func (r *GeoRepository) GetGeoAll(conn abstract.IDBConnection) ([]*domain.Geo, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var geoDAOs []model.Geo
-	err := db.Where("code IN ?", codes).
-		Find(&geoDAOs).Error
+	err := db.Find(&geoDAOs).Error
 
 	if err != nil {
 		return nil, err
