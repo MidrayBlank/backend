@@ -120,7 +120,8 @@ func TestGetRosstatHandler(t *testing.T) {
 		t.Fatalf("age: expected 3 records, got %d", len(year2023.ByAge))
 	}
 	if year2023.ByAge[0].Age != 0 || year2023.ByAge[0].Male != 5000 || year2023.ByAge[0].Female != 4800 {
-		t.Fatalf("age0: expected 0/5000/4800, got %d/%d/%d", year2023.ByAge[0].Age, year2023.ByAge[0].Male, year2023.ByAge[0].Female)
+		t.Fatalf("age[0]: expected 0/5000/4800, got %d/%d/%d", year2023.ByAge[0].Age, year2023.ByAge[0].Male, year2023.ByAge[0].Female)
 	}
 
+	cleanup(t, conn)
 }
