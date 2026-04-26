@@ -15,7 +15,7 @@ func NewRosstatAgeRepository() *RosstatAgeRepository {
 	return &RosstatAgeRepository{}
 }
 
-func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *domain.RosstatAge) error {
+func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *domain.RosstatByAge) error {
 	db := conn.Get().(*gorm.DB)
 
 	rosstatAgeDAO := &model.RosstatAge{}
@@ -35,7 +35,7 @@ func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *d
 		Create(rosstatAgeDAO).Error
 }
 
-func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnection, ids []int) ([]*domain.RosstatAge, error) {
+func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnection, ids []int) ([]*domain.RosstatByAge, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var rosstatAgeDAOs []model.RosstatAge

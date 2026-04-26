@@ -17,7 +17,8 @@ type PostgresDBConnection struct {
 func NewPostgresConnection(dsn string) *PostgresDBConnection {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix: "midray.",
+			TablePrefix:   "midray.",
+			SingularTable: true,
 		},
 	})
 
