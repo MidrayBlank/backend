@@ -2,24 +2,103 @@ package public
 
 import (
 	context "backend/src/internal/context/abstract"
+	"backend/src/internal/domain"
 	"backend/src/internal/dto"
 	service "backend/src/internal/service/abstract"
 )
 
 func GetRosstatInfo(ctx context.HandlerContext, params dto.RosstatParams, rosstatService service.IRosstatService) (dto.RosstatResponse, error) {
-	// rosstatList := rosstatService.GetRosstatByCodes(params.Codes)
+	rosstatList, err := rosstatService.GetRosstatByCodes(params.Codes)
+	if err != nil {
+		return nil, err
+	}
 
-	// for _, field := range params.Fields {
-	// 	if field == "population" {
-	// 		result := make([]dto.RosstatResponse, len(rosstatList))
+	codeMap := make(map[int][]domain.RosstatData)
+	for _, data := range rosstatList {
+		codeMap[data.Code] = append(codeMap[data.Code], data)
+	}
 
-	// 		for index, value := range rosstatList {
-	// 			result[index] = dto.RosstatResponse{}
-	// 		}
+	rosstatresponse := buildResponse(codeMap, params.Fields)
 
-	// 		return result, nil
-	// 	}
-	// }
+	return rosstatresponse, nil
+}
 
-	return dto.RosstatResponse{}, nil
+func buildResponse(codeMap map[int][]domain.RosstatData, fields []string) dto.RosstatResponse {
+	result := make([]dto.Rosstat, 0, len(codeMap))
+	for code, dataList := range codeMap {
+		item := dto.Rosstat{
+			Code:   code,
+			ByYear: make([]dto.RosstatByYear, len(dataList)),
+		}
+		for i, data := range dataList {
+			item.ByYear[i] = toRosstatByYear(data, fields)
+		}
+
+		result = append(result, item)
+	}
+	return result
+}
+
+func toRosstatByYear(data domain.RosstatData, fields []string) dto.RosstatByYear {
+	byYear := dto.RosstatByYear{}
+
+	for _, field := range fields {
+		switch field {
+		case "population":
+			byYear.Population = data.PopulationAmount
+		case "birth":
+			byYear.Birth = data.BirthAmount
+
+		case "death":
+			byYear.Death = data.DeathAmount
+
+		case "arrival":
+			byYear.Arrival = data.ArrivalAmount
+
+		case "departure":
+			byYear.Departure = data.DepartureAmount
+
+		case "male":
+			byYear.Male = data.MaleAmount
+
+		case "female":
+			byYear.Female = data.FemaleAmount
+
+		case "land_area":
+			byYear.LandArea = data.LandArea
+
+		case "avg_salary":
+			byYear.AvgSalary = data.AvgSalary
+
+		case "medicial_facilities":
+			byYear.MedicalFacilities = data.MedicalFacilities
+
+		case "schools":
+			byYear.SchoolsCount = data.SchoolsCount
+
+		case "housing_commissioned":
+			byYear.HousingCommissioned = data.HousingCommissioned
+
+		case "age":
+			byYear.ByAge = toRosstatByAgeSlice(data.AgeData)
+		}
+	}
+
+	return byYear
+}
+
+func toRosstatByAge(age domain.RosstatAgeData) dto.RosstatByAge {
+	return dto.RosstatByAge{
+		Age:    age.Age,
+		Male:   age.MaleAmount,
+		Female: age.FemaleAmount,
+	}
+}
+
+func toRosstatByAgeSlice(ageData []domain.RosstatAgeData) []dto.RosstatByAge {
+	result := make([]dto.RosstatByAge, len(ageData))
+	for i, age := range ageData {
+		result[i] = toRosstatByAge(age)
+	}
+	return result
 }
