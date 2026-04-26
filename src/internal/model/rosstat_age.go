@@ -11,10 +11,6 @@ type RosstatAge struct {
 	FemaleAmount int `gorm:"column:female_amount;type:int;not null"`
 }
 
-func (RosstatAge) TableName() string {
-	return "rosstat_age"
-}
-
 func (modelObj *RosstatAge) ToDomain() (*domain.RosstatByAge, error) {
 	return ToDomain[RosstatAge, domain.RosstatByAge](modelObj)
 }

@@ -22,10 +22,6 @@ type Rosstat struct {
 	HousingCommissioned *float64 `gorm:"column:housing_commissioned;type:decimal(10,2);nullable"`
 }
 
-func (Rosstat) TableName() string {
-	return "rosstat"
-}
-
 func (modelObj *Rosstat) ToDomain() (*domain.Rosstat, error) {
 	return ToDomain[Rosstat, domain.Rosstat](modelObj)
 }

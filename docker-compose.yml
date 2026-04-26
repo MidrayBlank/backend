@@ -2,6 +2,8 @@ services:
   db:
     container_name: postgres
     image: postgres:14.21-alpine
+    ports:
+      - "5432:5432"   
     shm_size: 128mb
     restart: always
     environment:

@@ -11,10 +11,6 @@ type Geo struct {
 	Level      int    `gorm:"column:level;type:int;not null"`
 }
 
-func (Geo) TableName() string {
-	return "geo"
-}
-
 func (modelObj *Geo) ToDomain() (*domain.Geo, error) {
 	return ToDomain[Geo, domain.Geo](modelObj)
 }

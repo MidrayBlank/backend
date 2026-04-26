@@ -10,10 +10,6 @@ type AiApi struct {
 	Requests int    `gorm:"column:requests;type:int;default:0"`
 }
 
-func (AiApi) TableName() string {
-	return "ai_api"
-}
-
 func (modelObj *AiApi) ToDomain(token string, requests int) (*domain.AiApi, error) {
 	if token == "" {
 		return nil, errors.New("token must not be empty")
