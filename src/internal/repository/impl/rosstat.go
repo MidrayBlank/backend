@@ -34,7 +34,7 @@ func (r *RosstatRepository) Upsert(conn abstract.IDBConnection, rosstat *domain.
 	}).Create(rosstatDAO).Error
 }
 
-func (r *RosstatRepository) GetRosstatByCodes(conn abstract.IDBConnection, codes []string) ([]*domain.Rosstat, error) {
+func (r *RosstatRepository) GetRosstatByCodes(conn abstract.IDBConnection, codes []int) ([]*domain.Rosstat, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var rosstatDAOs []model.Rosstat

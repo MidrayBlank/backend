@@ -2,7 +2,7 @@ package domain
 
 type Rosstat struct {
 	ID                  int
-	Code                string
+	Code                int
 	Year                int
 	PopulationAmount    int
 	BirthAmount         *int
