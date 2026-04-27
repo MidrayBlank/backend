@@ -12,13 +12,13 @@ import (
 )
 
 type Dispatcher struct {
-	channel       chan status.CompletionStatus
-	sem           *semaphore.Semaphore
-	conn          abstract.IDBConnection
-	requestsRepo  repository.AsyncRequestRepository
-	workerFactory *worker.WorkerFactory
-	sleepTime     time.Duration
-	maxAttempts   int
+	channel      chan status.CompletionStatus
+	sem          *semaphore.Semaphore
+	conn         abstract.IDBConnection
+	requestsRepo repository.AsyncRequestRepository
+	//workerFactory *worker.WorkerFactory
+	sleepTime   time.Duration
+	maxAttempts int
 }
 
 func NewDispatcher(
@@ -97,12 +97,29 @@ func (d *Dispatcher) ProcessCompletion(ctx context.Context) {
 			log.Printf("ProcessCompletion finished: %s", ctx.Err().Error())
 			return
 		case completionStatus := <-d.channel:
+			if completionStatus.Err != nil {
+				if completionStatus.Attempts >= d.maxAttempts {
+					if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusFailed); err != nil {
+						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
+					} else {
+						log.Printf("request was failed after %d attempts", completionStatus.Attempts)
+					}
 
-			// Помечаем заявку как
-			// - SUCCESS, если успешно завершилась
-			// - FAILED, если завершилась с ошибкой, а attempts == maxAttempts
-			// - QUEUED, если завершилась с ошибкой, а attempts < maxAttempts
-			// <помечаем заявки IN_PROGRESS, у которых вышел таймаут и больше 3-ех ошибок как FAILED> (?)
+				} else {
+					if err := d.requestsRepo.SetStatusAndIncrementById(ctx, d.conn, completionStatus.RequestId, status.StatusQueued); err != nil {
+						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
+					} else {
+						log.Printf("request %d was requeued ", completionStatus.RequestId)
+					}
+				}
+
+			} else {
+				if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusSuccess); err != nil {
+					log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
+				} else {
+					log.Printf("request %d completed", completionStatus.RequestId)
+				}
+			}
 		default:
 			if err := d.requestsRepo.CloseTimeoutRequests(ctx, d.conn); err != nil {
 				log.Printf("Error closing timeout requests: %v", err)
