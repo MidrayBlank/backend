@@ -22,7 +22,7 @@ func (c *GrowthLeadersReportCompiler) Compile(data []*domain.GrowthLeadersParams
 		if d.PopulationAmountFrom == 0 {
 			continue
 		}
-		growthPct := float32(d.PopulationAmountTo-d.PopulationAmountFrom) / float32(d.PopulationAmountFrom) * 100
+		growthPct := float64(d.PopulationAmountTo-d.PopulationAmountFrom) / float64(d.PopulationAmountFrom) * 100
 		items = append(items, dto.GrowthItem{
 			OKTMO:     d.OKTMO,
 			YearFrom:  d.YearFrom,

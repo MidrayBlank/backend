@@ -19,11 +19,11 @@ type RosstatByYear struct {
 	Departure           *int           `json:"departure,omitempty"`
 	Male                *int           `json:"male,omitempty"`
 	Female              *int           `json:"female,omitempty"`
-	LandArea            *float64       `json:"land_area,omitempty"`
+	LandArea            *int           `json:"land_area,omitempty"`
 	AvgSalary           *float64       `json:"avg_salary,omitempty"`
 	MedicalFacilities   *int           `json:"medical_facilities,omitempty"`
 	SchoolsCount        *int           `json:"schools,omitempty"`
-	HousingCommissioned *float64       `json:"housing_commissioned,omitempty"`
+	HousingCommissioned *int           `json:"housing_commissioned,omitempty"`
 	ByAge               []RosstatByAge `json:"by_age,omitempty"`
 }
 
