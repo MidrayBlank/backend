@@ -16,6 +16,7 @@ import (
 
 	sabst "backend/src/internal/service/abstract"
 
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -35,6 +36,13 @@ func Run() {
 		EnableSplittingOnParsers: true,
 		StructValidator:          validator.NewFiberStructValidator(),
 	})
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "https://midray.ru",
+		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
+		AllowHeaders:     "Accept, Content-Type, Authorization",
+		AllowCredentials: true,
+	}))
 
 	app.Get("/ping", health.PingHandler)
 
