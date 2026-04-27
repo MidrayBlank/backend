@@ -4,35 +4,35 @@ type Rosstat struct {
 	ID                  int
 	Code                int
 	Year                int
-	PopulationAmount    int
+	PopulationAmount    *int
 	BirthAmount         *int
 	DeathAmount         *int
 	ArrivalAmount       *int
 	DepartureAmount     *int
 	MaleAmount          *int
 	FemaleAmount        *int
-	LandArea            *float64
+	LandArea            *int
 	AvgSalary           *float64
 	MedicalFacilities   *int
 	SchoolsCount        *int
-	HousingCommissioned *float64
+	HousingCommissioned *int
 }
 
 type RosstatByYear struct {
 	Code                int
 	Year                int
-	PopulationAmount    int
+	PopulationAmount    *int
 	BirthAmount         *int
 	DeathAmount         *int
 	ArrivalAmount       *int
 	DepartureAmount     *int
 	MaleAmount          *int
 	FemaleAmount        *int
-	LandArea            *float64
+	LandArea            *int
 	AvgSalary           *float64
 	MedicalFacilities   *int
 	SchoolsCount        *int
-	HousingCommissioned *float64
+	HousingCommissioned *int
 	AgeData             []RosstatByAge
 }
 
