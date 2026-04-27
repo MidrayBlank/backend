@@ -35,6 +35,29 @@ func (r *RosstatAgeRepository) Upsert(conn abstract.IDBConnection, rosstatAge *d
 		Create(rosstatAgeDAO).Error
 }
 
+func (r *RosstatAgeRepository) UpsertBatch(conn abstract.IDBConnection, rosstatAges []*domain.RosstatByAge) error {
+	db := conn.Get().(*gorm.DB)
+
+	rosstatAgeDAO := &model.RosstatAge{}
+	rosstatAgeDAOs := make([]*model.RosstatAge, 0, len(rosstatAges))
+	for _, ra := range rosstatAges {
+		populated, err := rosstatAgeDAO.ToModel(ra)
+		if err != nil {
+			return err
+		}
+		rosstatAgeDAOs = append(rosstatAgeDAOs, populated)
+	}
+
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "rosstat_id"},
+			{Name: "age"},
+		},
+		UpdateAll: true,
+	}).
+		Create(&rosstatAgeDAOs).Error
+}
+
 func (r *RosstatAgeRepository) GetRosstatAgeByRosstatIDs(conn abstract.IDBConnection, ids []int) ([]*domain.RosstatByAge, error) {
 	db := conn.Get().(*gorm.DB)
 

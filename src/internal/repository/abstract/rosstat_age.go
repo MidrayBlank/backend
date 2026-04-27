@@ -7,5 +7,6 @@ import (
 
 type IRosstatAgeRepository interface {
 	Upsert(conn abstract.IDBConnection, rosstatAge *domain.RosstatByAge) error
+	UpsertBatch(conn abstract.IDBConnection, rosstatAges []*domain.RosstatByAge) error
 	GetRosstatAgeByRosstatIDs(conn abstract.IDBConnection, ids []int) ([]*domain.RosstatByAge, error)
 }
