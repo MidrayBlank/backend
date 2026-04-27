@@ -21,7 +21,7 @@ func (r *AsyncRequestRepository) GetAllRequests(ctx context.Context, conn abstra
 
 	var requests []model.AsyncRequest
 	err := db.WithContext(ctx).
-		Where("status = ? AND attempts < ? AND (deadline_at IS NULL OR deadline_at < ?)",
+		Where("status = ? AND attempts < ? AND (deadline_at IS NULL OR deadline_at > ?)",
 			status.StatusQueued, 3, time.Now()).
 		Find(&requests).Error
 
