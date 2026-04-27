@@ -37,7 +37,7 @@ paths:
             type: array
             items:
               type: string
-              enum: [population, birth, death, arrival, departure, age,
+              enum: [year, population, birth, death, arrival, departure, age,
                     male, female, land_area, avg_salary,
                     medicial_facilities, schools, housing_commissioned] 
           style: form
@@ -177,6 +177,9 @@ components:
     RosstatByYear:
       type: object
       properties:
+        year:
+          type: integer
+          description: Указанный год
         population:
           type: integer
           description: Численность населения за указанный год.

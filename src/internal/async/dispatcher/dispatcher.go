@@ -83,7 +83,7 @@ func (d *Dispatcher) RunWorkers(ctx context.Context) {
 					d.sem.Release()
 					return
 				}
-				// ToDO: сделать фабрику worker и запусть worker
+				// ToDO: сделать фабрику worker и запустить worker
 
 			}()
 		}
