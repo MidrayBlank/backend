@@ -12,16 +12,19 @@ type Config struct {
 	DBHost     string
 	DBPort     int
 	ServerPort int
+
+	MaxWorkersCount int
 }
 
 func Load() *Config {
 	cfg := &Config{
-		DBUser:     "postgres",
-		DBPassword: "",
-		DBNAME:     "postgres",
-		DBHost:     "localhost",
-		DBPort:     5432,
-		ServerPort: 8080,
+		DBUser:          "postgres",
+		DBPassword:      "",
+		DBNAME:          "postgres",
+		DBHost:          "localhost",
+		DBPort:          5432,
+		ServerPort:      8080,
+		MaxWorkersCount: 3,
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
@@ -49,6 +52,12 @@ func Load() *Config {
 	if value := os.Getenv("SERVER_PORT"); value != "" {
 		if port, err := strconv.Atoi(value); err == nil {
 			cfg.ServerPort = port
+		}
+	}
+
+	if value := os.Getenv("MAX_WORKERS_COUNT"); value != "" {
+		if maxWorkersCount, err := strconv.Atoi(value); err == nil {
+			cfg.MaxWorkersCount = maxWorkersCount
 		}
 	}
 
