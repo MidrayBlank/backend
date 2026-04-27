@@ -16,7 +16,6 @@ import (
 
 	sabst "backend/src/internal/service/abstract"
 
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -37,12 +36,18 @@ func Run() {
 		StructValidator:          validator.NewFiberStructValidator(),
 	})
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "https://midray.ru",
-		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
-		AllowHeaders:     "Accept, Content-Type, Authorization",
-		AllowCredentials: true,
-	}))
+	// CORS middleware
+	app.Use(func(c fiber.Ctx) error {
+			c.Set("Access-Control-Allow-Origin", "https://midray.ru")
+			c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization")
+
+			if c.Method() == fiber.MethodOptions {
+					return c.SendStatus(fiber.StatusNoContent)
+			}
+
+			return c.Next()
+	})
 
 	app.Get("/ping", health.PingHandler)
 
