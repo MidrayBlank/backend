@@ -7,7 +7,6 @@ import (
 	rimpl "backend/src/internal/repository/impl"
 	"context"
 	"sync"
-	"time"
 )
 
 func main() {
@@ -15,7 +14,7 @@ func main() {
 
 	conn := postgres.NewPostgresConnection(config.GetDBDSN())
 	requestsRepo := rimpl.NewAsyncRequesRepository()
-	dispatcher := dispatcher.NewDispatcher(conn, *requestsRepo, 5*time.Second, config.MaxAttempts, config.MaxWorkersCount)
+	dispatcher := dispatcher.NewDispatcher(conn, *requestsRepo, config.TimeSleep, config.MaxAttempts, config.MaxWorkersCount)
 
 	var wg sync.WaitGroup
 	wg.Add(2)

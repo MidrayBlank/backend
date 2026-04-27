@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"time"
 )
 
 type Config struct {
@@ -14,6 +15,9 @@ type Config struct {
 	ServerPort int
 
 	MaxWorkersCount int
+	MaxAttempts     int
+
+	TimeSleep time.Duration
 }
 
 func Load() *Config {
@@ -25,6 +29,8 @@ func Load() *Config {
 		DBPort:          5432,
 		ServerPort:      8080,
 		MaxWorkersCount: 3,
+		MaxAttempts:     3,
+		TimeSleep:       5 * time.Second,
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
