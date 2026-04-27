@@ -16,13 +16,13 @@ func NewAsyncRequesRepository() *AsyncRequestRepository {
 	return &AsyncRequestRepository{}
 }
 
-func (r *AsyncRequestRepository) GetAll(ctx context.Context, conn abstract.IDBConnection) ([]model.AsyncRequest, error) {
+func (r *AsyncRequestRepository) GetAllRequests(ctx context.Context, conn abstract.IDBConnection) ([]model.AsyncRequest, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var requests []model.AsyncRequest
 	err := db.WithContext(ctx).
-		Where("(status = ?) OR (status = ? AND attempts < ? AND deadline_at IS NULL AND deadline_at < ?)",
-			status.StatusQueued, status.StatusInProgress, 3, time.Now()).
+		Where("status = ? AND attempts < ? AND (deadline_at IS NULL OR deadline_at < ?)",
+			status.StatusQueued, 3, time.Now()).
 		Find(&requests).Error
 
 	return requests, err
