@@ -31,7 +31,7 @@ func NewDispatcher(
 	sem := semaphore.NewSemaphore(maxWorkersCount)
 	return &Dispatcher{
 		channel:      make(chan status.CompletionStatus, maxWorkersCount*2),
-		sem:          &sem,
+		sem:          sem,
 		conn:         conn,
 		requestsRepo: requestsRepo,
 		sleepTime:    sleepTime,

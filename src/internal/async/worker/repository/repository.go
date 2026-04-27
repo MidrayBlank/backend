@@ -7,5 +7,5 @@ type WorkerRepositories struct {
 	RosstatRepository    abstract.IRosstatRepository
 	RosstatAgeRepository abstract.IRosstatAgeRepository
 
-	AiApiRepository abstract.IAiApiRepositoru
+	AiApiRepository abstract.IAiApiRepository
 }

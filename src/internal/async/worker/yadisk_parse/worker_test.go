@@ -27,7 +27,7 @@ func TestPopulation(t *testing.T) {
 	yadisk_parse.YadiskParseWorker(
 		ctx,
 		ch,
-		sem,
+		*sem,
 		conn,
 		repositories,
 		1,
