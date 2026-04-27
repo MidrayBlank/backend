@@ -67,6 +67,12 @@ func Load() *Config {
 		}
 	}
 
+	if value := os.Getenv("MAX_ATTEMPTS_COUNT"); value != "" {
+		if maxAttemptsCount, err := strconv.Atoi(value); err == nil {
+			cfg.MaxAttempts = maxAttemptsCount
+		}
+	}
+
 	return cfg
 }
 
