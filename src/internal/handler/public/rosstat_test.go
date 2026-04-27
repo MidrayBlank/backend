@@ -40,22 +40,23 @@ func TestGetRosstatHandler(t *testing.T) {
 		t.Fatalf("failed to create geo: %v", err)
 	}
 
+	population2023 := 1200000
 	birth2023 := 12000
 	death2023 := 15000
 	arrival2023 := 5000
 	departure2023 := 3000
 	male2023 := 560000
 	female2023 := 640000
-	landArea := 500.5
+	landArea := 500
 	avgSalary := 55000.0
 	medical := 45
 	schools := 120
-	housing := 250.3
+	housing := 250
 
 	rosstat := &model.Rosstat{
 		Code:                45001,
 		Year:                2023,
-		PopulationAmount:    1200000,
+		PopulationAmount:    &population2023,
 		BirthAmount:         &birth2023,
 		DeathAmount:         &death2023,
 		ArrivalAmount:       &arrival2023,

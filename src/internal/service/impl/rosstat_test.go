@@ -9,36 +9,38 @@ func TestToRosstatList(t *testing.T) {
 	service := &RosstatService{}
 
 	t.Run("successful combinating", func(t *testing.T) {
+		population1 := 1200000
 		birth1 := 12000
 		death1 := 15000
 		arrival1 := 5000
 		departure1 := 3000
 		male1 := 560000
 		female1 := 640000
-		landArea1 := 500.5
+		landArea1 := 500
 		avgSalary1 := 55000.0
 		medical1 := 45
 		schools1 := 120
-		housing1 := 250.3
+		housing1 := 250
 
+		population2 := 1210000
 		birth2 := 11800
 		death2 := 15200
 		arrival2 := 5200
 		departure2 := 3100
 		male2 := 565000
 		female2 := 645000
-		landArea2 := 505.5
+		landArea2 := 505
 		avgSalary2 := 56000.0
 		medical2 := 46
 		schools2 := 121
-		housing2 := 260.5
+		housing2 := 260
 
 		rosstatByYears := []*domain.Rosstat{
 			{
 				ID:                  1,
 				Code:                45001,
 				Year:                2023,
-				PopulationAmount:    1200000,
+				PopulationAmount:    &population1,
 				BirthAmount:         &birth1,
 				DeathAmount:         &death1,
 				ArrivalAmount:       &arrival1,
@@ -55,7 +57,7 @@ func TestToRosstatList(t *testing.T) {
 				ID:                  2,
 				Code:                45001,
 				Year:                2024,
-				PopulationAmount:    1210000,
+				PopulationAmount:    &population2,
 				BirthAmount:         &birth2,
 				DeathAmount:         &death2,
 				ArrivalAmount:       &arrival2,
@@ -91,8 +93,8 @@ func TestToRosstatList(t *testing.T) {
 			t.Errorf("invalid count of objects")
 		}
 
-		if *result[0].HousingCommissioned != 250.3 {
-			t.Errorf("got: %f, expected: %f", *result[0].HousingCommissioned, 250.3)
+		if *result[0].HousingCommissioned != 250 {
+			t.Errorf("got: %d, expected: %f", *result[0].HousingCommissioned, 250.3)
 		}
 
 	})

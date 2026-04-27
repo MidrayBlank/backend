@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS midray.rosstat (
     code                    INTEGER         NOT NULL,
     year                    INTEGER         NOT NULL,
 
-    population_amout        INTEGER         NOT NULL,
+    population_amout        INTEGER         NULL,
     birth_amount            INTEGER         NULL,
     death_amount            INTEGER         NULL,
     arrival_amount          INTEGER         NULL,
@@ -14,11 +14,11 @@ CREATE TABLE IF NOT EXISTS midray.rosstat (
     male_amount             INTEGER         NULL,
     female_amount           INTEGER         NULL,
 
-    land_area               DECIMAL(10,2)   NULL,  
+    land_area               INTEGER         NULL,  
     avg_salary              DECIMAL(10,2)   NULL,     
     medical_facilities      INTEGER         NULL,  
     schools_count           INTEGER         NULL,       
-    housing_commissioned    DECIMAL(10,2)   NULL,
+    housing_commissioned    INTEGER         NULL,
     UNIQUE(code, year)
 );
 
