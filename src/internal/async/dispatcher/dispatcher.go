@@ -17,8 +17,9 @@ type Dispatcher struct {
 	conn         abstract.IDBConnection
 	requestsRepo repository.AsyncRequestRepository
 	//workerFactory *worker.WorkerFactory
-	sleepTime   time.Duration
-	maxAttempts int
+	sleepTime          time.Duration
+	requestsAttampsMap map[int]int
+	maxAttempts        int
 }
 
 func NewDispatcher(
@@ -30,12 +31,13 @@ func NewDispatcher(
 ) *Dispatcher {
 	sem := semaphore.NewSemaphore(maxWorkersCount)
 	return &Dispatcher{
-		channel:      make(chan status.CompletionStatus, maxWorkersCount*2),
-		sem:          sem,
-		conn:         conn,
-		requestsRepo: requestsRepo,
-		sleepTime:    sleepTime,
-		maxAttempts:  maxAttempts,
+		channel:            make(chan status.CompletionStatus, maxWorkersCount*2),
+		sem:                sem,
+		conn:               conn,
+		requestsRepo:       requestsRepo,
+		sleepTime:          sleepTime,
+		requestsAttampsMap: make(map[int]int),
+		maxAttempts:        maxAttempts,
 	}
 }
 
@@ -100,6 +102,7 @@ func (d *Dispatcher) ProcessCompletion(ctx context.Context) {
 			return
 		case completionStatus := <-d.channel:
 			if completionStatus.Err != nil {
+
 				if completionStatus.Attempts >= d.maxAttempts {
 					if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusFailed); err != nil {
 						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
@@ -115,6 +118,7 @@ func (d *Dispatcher) ProcessCompletion(ctx context.Context) {
 						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
 					}
 				}
+
 			}
 		default:
 			if err := d.requestsRepo.CloseTimeoutRequests(ctx, d.conn); err != nil {
