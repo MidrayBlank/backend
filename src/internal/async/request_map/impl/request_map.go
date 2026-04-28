@@ -20,19 +20,12 @@ func (ram *RequestAttemptsMap) Put(requestID int) {
 	ram.data[requestID]++
 }
 
-func (ram *RequestAttemptsMap) Get(requestID int) int {
+func (ram *RequestAttemptsMap) Get(requestID int) (int, bool) {
 	ram.mu.Lock()
 	defer ram.mu.Unlock()
+	value, exists := ram.data[requestID]
 
-	return ram.data[requestID]
-}
-
-func (ram *RequestAttemptsMap) Has(requestID int) bool {
-	ram.mu.Lock()
-	defer ram.mu.Unlock()
-
-	_, exists := ram.data[requestID]
-	return exists
+	return value, exists
 }
 
 func (ram *RequestAttemptsMap) Delete(requestID int) {
