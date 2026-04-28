@@ -7,8 +7,8 @@ type RequestAttemptsMap struct {
 	mu   sync.Mutex
 }
 
-func NewRequestAttemptsMap() *RequestAttemptsMap {
-	return &RequestAttemptsMap{
+func NewRequestAttemptsMap() RequestAttemptsMap {
+	return RequestAttemptsMap{
 		data: make(map[int]int),
 	}
 }
