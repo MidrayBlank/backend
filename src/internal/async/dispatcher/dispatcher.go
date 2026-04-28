@@ -48,46 +48,48 @@ func (d *Dispatcher) RunWorkers(ctx context.Context) {
 		default:
 			d.sem.Acquire()
 
-			func() {
-				txConn := d.conn.BeginTx()
-
-				defer func() {
-					if r := recover(); r != nil {
-						txConn.Rollback()
-						d.sem.Release()
-					}
-				}()
-
-				requests, err := d.requestsRepo.GetAllRequests(ctx, txConn)
-				if err != nil {
-					txConn.Rollback()
-					d.sem.Release()
-					return
-				}
-
-				if len(requests) == 0 {
-					txConn.Rollback()
-					d.sem.Release()
-					time.Sleep(d.sleepTime)
-					return
-				}
-
-				requst := requests[0]
-				if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, requst.ID, status.StatusInProgress); err != nil {
-					txConn.Rollback()
-					d.sem.Release()
-					return
-				}
-
-				if err := txConn.Commit(); err != nil {
-					d.sem.Release()
-					return
-				}
-				// ToDO: сделать фабрику worker и запустить worker
-
-			}()
+			d.fetchRequestsAndRunWorkers(ctx)
 		}
 	}
+}
+
+func (d *Dispatcher) fetchRequestsAndRunWorkers(ctx context.Context) {
+	txConn := d.conn.BeginTx()
+
+	defer func() {
+		if r := recover(); r != nil {
+			txConn.Rollback()
+			d.sem.Release()
+		}
+	}()
+
+	requests, err := d.requestsRepo.GetAllRequests(ctx, txConn)
+	if err != nil {
+		txConn.Rollback()
+		d.sem.Release()
+		return
+	}
+
+	if len(requests) == 0 {
+		txConn.Rollback()
+		d.sem.Release()
+		time.Sleep(d.sleepTime)
+		return
+	}
+
+	requst := requests[0]
+	if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, requst.ID, status.StatusInProgress); err != nil {
+		txConn.Rollback()
+		d.sem.Release()
+		return
+	}
+
+	if err := txConn.Commit(); err != nil {
+		d.sem.Release()
+		return
+	}
+
+	// ToDO: сделать фабрику worker и запустить worker
 }
 
 func (d *Dispatcher) ProcessCompletion(ctx context.Context) {
