@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	map_interface "backend/src/internal/async/request_map/abstract"
 	request_map "backend/src/internal/async/request_map/impl"
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
@@ -20,7 +21,7 @@ type Dispatcher struct {
 	//workerFactory *worker.WorkerFactory
 	sleepTime          time.Duration
 	maxAttempts        int
-	requestAttemptsMap request_map.RequestAttemptsMap
+	requestAttemptsMap map_interface.IRequestAttemptsMap
 }
 
 func NewDispatcher(
