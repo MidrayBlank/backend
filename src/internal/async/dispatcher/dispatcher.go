@@ -9,6 +9,8 @@ import (
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
 	"backend/src/internal/db/abstract"
+
+	worker_repositories "backend/src/internal/async/worker/repository"
 	repository "backend/src/internal/repository/impl"
 )
 
@@ -17,7 +19,10 @@ type Dispatcher struct {
 	sem          semaphore.Semaphore
 	conn         abstract.IDBConnection
 	requestsRepo repository.AsyncRequestRepository
+
 	//workerFactory *worker.WorkerFactory
+	workerRepositories worker_repositories.WorkerRepositories
+
 	sleepTime          time.Duration
 	maxAttempts        int
 	requestAttemptsMap request_map.RequestAttemptsMap
@@ -26,6 +31,7 @@ type Dispatcher struct {
 func NewDispatcher(
 	conn abstract.IDBConnection,
 	requestsRepo repository.AsyncRequestRepository,
+	workerRepositories worker_repositories.WorkerRepositories,
 	sleepTime time.Duration,
 	maxAttempts int,
 	maxWorkersCount int,
@@ -36,6 +42,7 @@ func NewDispatcher(
 		sem:                sem,
 		conn:               conn,
 		requestsRepo:       requestsRepo,
+		workerRepositories: workerRepositories,
 		sleepTime:          sleepTime,
 		requestAttemptsMap: request_map.NewRequestAttemptsMap(),
 		maxAttempts:        maxAttempts,

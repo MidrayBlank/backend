@@ -2,6 +2,7 @@ package async_backend
 
 import (
 	"backend/src/internal/async/dispatcher"
+	worker_repositories "backend/src/internal/async/worker/repository"
 	"backend/src/internal/config"
 	"backend/src/internal/db/postgres"
 	rimpl "backend/src/internal/repository/impl"
@@ -14,7 +15,9 @@ func main() {
 
 	conn := postgres.NewPostgresConnection(config.GetDBDSN())
 	requestsRepo := rimpl.NewAsyncRequesRepository()
-	dispatcher := dispatcher.NewDispatcher(conn, *requestsRepo, config.DispatcherTimeSleep, config.DispatcherMaxAttempts, config.MaxWorkersCount)
+	workerRepositories := worker_repositories.NewWorkerRepositories()
+
+	dispatcher := dispatcher.NewDispatcher(conn, *requestsRepo, workerRepositories, config.DispatcherTimeSleep, config.DispatcherMaxAttempts, config.MaxWorkersCount)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
