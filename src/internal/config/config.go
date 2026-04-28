@@ -73,6 +73,12 @@ func Load() *Config {
 		}
 	}
 
+	if value := os.Getenv("TIMER_SLEEP_SECONDS"); value != "" {
+		if seconds, err := strconv.Atoi(value); err == nil {
+			cfg.TimeSleep = time.Duration(seconds)
+		}
+	}
+
 	return cfg
 }
 
