@@ -65,7 +65,8 @@ func (d *Dispatcher) ProcessCompletion(ctx context.Context) {
 		case completionStatus := <-d.channel:
 			if completionStatus.Err != nil {
 
-				if completionStatus.Attempts >= d.maxAttempts {
+				attempts := d.requestAttemptsMap.Get(completionStatus.RequestId)
+				if attempts >= d.maxAttempts {
 					if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusFailed); err != nil {
 						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
 
@@ -121,11 +122,13 @@ func (d *Dispatcher) fetchRequestsAndRunWorkers(ctx context.Context) {
 	if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, requst.ID, status.StatusInProgress); err != nil {
 		txConn.Rollback()
 		d.sem.Release()
+		d.requestAttemptsMap.Delete(requst.ID)
 		return
 	}
 
 	if err := txConn.Commit(); err != nil {
 		d.sem.Release()
+		d.requestAttemptsMap.Delete(requst.ID)
 		return
 	}
 
