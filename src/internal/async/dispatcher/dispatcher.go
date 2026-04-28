@@ -3,19 +3,14 @@ package dispatcher
 import (
 	"context"
 	"log"
-	"sync"
 	"time"
 
+	request_map "backend/src/internal/async/request_map/impl"
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
 	"backend/src/internal/db/abstract"
 	repository "backend/src/internal/repository/impl"
 )
-
-type RequestsAttemptsMap struct {
-	requestsAttemptsMap map[int]int
-	mu                  sync.Mutex
-}
 
 type Dispatcher struct {
 	channel      chan status.CompletionStatus
@@ -23,9 +18,9 @@ type Dispatcher struct {
 	conn         abstract.IDBConnection
 	requestsRepo repository.AsyncRequestRepository
 	//workerFactory *worker.WorkerFactory
-	sleepTime           time.Duration
-	maxAttempts         int
-	requestsAttemptsMap RequestsAttemptsMap
+	sleepTime          time.Duration
+	maxAttempts        int
+	requestAttemptsMap request_map.RequestAttemptsMap
 }
 
 func NewDispatcher(
@@ -37,19 +32,13 @@ func NewDispatcher(
 ) *Dispatcher {
 	sem := semaphore.NewSemaphore(maxWorkersCount)
 	return &Dispatcher{
-		channel:             make(chan status.CompletionStatus, maxWorkersCount*2),
-		sem:                 sem,
-		conn:                conn,
-		requestsRepo:        requestsRepo,
-		sleepTime:           sleepTime,
-		requestsAttemptsMap: NewRequestsAttemptsMap(),
-		maxAttempts:         maxAttempts,
-	}
-}
-
-func NewRequestsAttemptsMap() RequestsAttemptsMap {
-	return RequestsAttemptsMap{
-		requestsAttemptsMap: make(map[int]int),
+		channel:            make(chan status.CompletionStatus, maxWorkersCount*2),
+		sem:                sem,
+		conn:               conn,
+		requestsRepo:       requestsRepo,
+		sleepTime:          sleepTime,
+		requestAttemptsMap: request_map.NewRequestAttemptsMap(),
+		maxAttempts:        maxAttempts,
 	}
 }
 
