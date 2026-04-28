@@ -7,7 +7,7 @@ import (
 )
 
 type IAsyncRequestRepository interface {
-	GetAllRequests(ctx context.Context, conn abstract.IDBConnection) ([]model.AsyncRequest, error)
+	GetOneRequest(ctx context.Context, conn abstract.IDBConnection) (*model.AsyncRequest, error)
 	SetStatusById(ctx context.Context, conn abstract.IDBConnection, id int, status int) error
 	SetStatusAndIncrementById(ctx context.Context, conn abstract.IDBConnection, id int, status int) error
 	CloseTimeoutRequests(ctx context.Context, conn abstract.IDBConnection) error

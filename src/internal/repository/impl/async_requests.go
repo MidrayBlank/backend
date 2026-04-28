@@ -16,16 +16,23 @@ func NewAsyncRequesRepository() *AsyncRequestRepository {
 	return &AsyncRequestRepository{}
 }
 
-func (r *AsyncRequestRepository) GetAllRequests(ctx context.Context, conn abstract.IDBConnection) ([]model.AsyncRequest, error) {
+func (r *AsyncRequestRepository) GetOneRequest(ctx context.Context, conn abstract.IDBConnection) (*model.AsyncRequest, error) {
 	db := conn.Get().(*gorm.DB)
 
-	var requests []model.AsyncRequest
-	err := db.WithContext(ctx).
-		Where("status = ? AND attempts < ? AND (deadline_at IS NULL OR deadline_at > ?)",
-			status.StatusQueued, 3, time.Now()).
-		Find(&requests).Error
+	query := `
+		SELECT * FROM midray.async_requests 
+        WHERE status = ? 
+          AND (deadline_at IS NULL OR deadline_at > ?)
+        LIMIT 1 
+        FOR UPDATE SKIP LOCKED
+	`
 
-	return requests, err
+	var request model.AsyncRequest
+	err := db.WithContext(ctx).
+		Raw(query, status.StatusQueued, time.Now()).
+		Scan(&request).Error
+
+	return &request, err
 }
 
 func (r *AsyncRequestRepository) SetStatusById(ctx context.Context, conn abstract.IDBConnection, id int, status int) error {

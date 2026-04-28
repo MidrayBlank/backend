@@ -15,7 +15,7 @@ import (
 
 type Dispatcher struct {
 	channel      chan status.CompletionStatus
-	sem          *semaphore.Semaphore
+	sem          semaphore.Semaphore
 	conn         abstract.IDBConnection
 	requestsRepo repository.AsyncRequestRepository
 	//workerFactory *worker.WorkerFactory
@@ -103,33 +103,31 @@ func (d *Dispatcher) fetchRequestsAndRunWorkers(ctx context.Context) {
 		}
 	}()
 
-	requests, err := d.requestsRepo.GetAllRequests(ctx, txConn)
+	request, err := d.requestsRepo.GetOneRequest(ctx, txConn)
 	if err != nil {
 		txConn.Rollback()
 		d.sem.Release()
 		return
 	}
 
-	if len(requests) == 0 {
+	if request == nil {
 		txConn.Rollback()
 		d.sem.Release()
 		time.Sleep(d.sleepTime)
 		return
 	}
 
-	requst := requests[0]
-	d.requestAttemptsMap.Put(requst.ID)
+	d.requestAttemptsMap.Put(request.ID)
 
-	if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, requst.ID, status.StatusInProgress); err != nil {
+	if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, request.ID, status.StatusInProgress); err != nil {
 		txConn.Rollback()
 		d.sem.Release()
-		d.requestAttemptsMap.Delete(requst.ID)
+		d.requestAttemptsMap.Delete(request.ID)
 		return
 	}
 
 	if err := txConn.Commit(); err != nil {
 		d.sem.Release()
-		d.requestAttemptsMap.Delete(requst.ID)
 		return
 	}
 
