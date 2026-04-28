@@ -58,7 +58,7 @@ func (d *Dispatcher) RunWorkers(ctx context.Context) {
 					}
 				}()
 
-				requests, err := d.requestsRepo.GetAllRequests(ctx, d.conn)
+				requests, err := d.requestsRepo.GetAllRequests(ctx, txConn)
 				if err != nil {
 					txConn.Rollback()
 					d.sem.Release()
@@ -73,7 +73,7 @@ func (d *Dispatcher) RunWorkers(ctx context.Context) {
 				}
 
 				requst := requests[0]
-				if err = d.requestsRepo.SetStatusAndIncrementById(ctx, d.conn, requst.ID, status.StatusInProgress); err != nil {
+				if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, requst.ID, status.StatusInProgress); err != nil {
 					txConn.Rollback()
 					d.sem.Release()
 					return
