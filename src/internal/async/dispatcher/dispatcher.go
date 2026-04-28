@@ -3,6 +3,7 @@ package dispatcher
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
 	"backend/src/internal/async/semaphore"
@@ -11,15 +12,20 @@ import (
 	repository "backend/src/internal/repository/impl"
 )
 
+type RequestsAttemptsMap struct {
+	requestsAttemptsMap map[int]int
+	mu                  sync.Mutex
+}
+
 type Dispatcher struct {
 	channel      chan status.CompletionStatus
 	sem          *semaphore.Semaphore
 	conn         abstract.IDBConnection
 	requestsRepo repository.AsyncRequestRepository
 	//workerFactory *worker.WorkerFactory
-	sleepTime          time.Duration
-	requestsAttampsMap map[int]int
-	maxAttempts        int
+	sleepTime           time.Duration
+	maxAttempts         int
+	requestsAttemptsMap RequestsAttemptsMap
 }
 
 func NewDispatcher(
@@ -31,13 +37,19 @@ func NewDispatcher(
 ) *Dispatcher {
 	sem := semaphore.NewSemaphore(maxWorkersCount)
 	return &Dispatcher{
-		channel:            make(chan status.CompletionStatus, maxWorkersCount*2),
-		sem:                sem,
-		conn:               conn,
-		requestsRepo:       requestsRepo,
-		sleepTime:          sleepTime,
-		requestsAttampsMap: make(map[int]int),
-		maxAttempts:        maxAttempts,
+		channel:             make(chan status.CompletionStatus, maxWorkersCount*2),
+		sem:                 sem,
+		conn:                conn,
+		requestsRepo:        requestsRepo,
+		sleepTime:           sleepTime,
+		requestsAttemptsMap: NewRequestsAttemptsMap(),
+		maxAttempts:         maxAttempts,
+	}
+}
+
+func NewRequestsAttemptsMap() RequestsAttemptsMap {
+	return RequestsAttemptsMap{
+		requestsAttemptsMap: make(map[int]int),
 	}
 }
 
