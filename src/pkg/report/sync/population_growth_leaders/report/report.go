@@ -1,7 +1,7 @@
 package report
 
 import (
-	"backend/src/pkg/report/population_growth_leaders/domain"
+	"backend/src/pkg/report/sync/population_growth_leaders/domain"
 	"backend/src/pkg/report/sync/population_growth_leaders/dto"
 
 	"sort"

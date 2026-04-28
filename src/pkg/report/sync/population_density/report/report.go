@@ -1,6 +1,6 @@
 package report
 
-import "backend/src/pkg/report/population_density/domain"
+import "backend/src/pkg/report/sync/population_density/domain"
 
 type PopulationDensityReportCompiler struct{}
 
