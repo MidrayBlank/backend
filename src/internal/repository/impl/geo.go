@@ -67,7 +67,7 @@ func (r *GeoRepository) GetGeoAll(conn abstract.IDBConnection) ([]*domain.Geo, e
 	return modelObj.ToDomainSlice(geoDAOs)
 }
 
-func (r *GeoRepository) GetByCode(conn abstract.IDBConnection, code int) (*domain.Geo, error) {
+func (r *GeoRepository) GetGeoByCode(conn abstract.IDBConnection, code int) (*domain.Geo, error) {
 	db := conn.Get().(*gorm.DB)
 
 	var geoDAO model.Geo
