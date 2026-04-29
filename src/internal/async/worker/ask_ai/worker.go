@@ -36,7 +36,7 @@ func AskAIByCodeWorker(
 	tableStats := formatStatsForAI(rosstatStats, rosstatAgeStats)
 	prompt := buildAIPrompt(regionName, tableStats)
 
-	aiRouterClient := ai.NewAIOpenRouter(workerConfig.ApiKey, workerConfig.AiModel, workerConfig.OpenRouterBaseURL)
+	aiRouterClient := ai.NewAIOpenRouter(workerConfig.AiApiKeys, workerConfig.AiModel, workerConfig.OpenRouterBaseURL)
 
 	response, err := aiRouterClient.SendRequest(prompt)
 	if err != nil {
@@ -50,7 +50,7 @@ func AskAIByCodeWorker(
 		return
 	}
 
-	err = workerConfig.AiApiRepository.IncreaseRequests(conn, cfg.AiApiKey)
+	err = workerConfig.AiApiRepository.IncreaseRequests(conn, workerConfig.ApiKeys)
 	if err != nil {
 		log.Printf("Failed to increase count of requests: %v", err)
 	}
