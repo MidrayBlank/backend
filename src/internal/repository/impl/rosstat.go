@@ -4,6 +4,7 @@ import (
 	"backend/src/internal/db/abstract"
 	"backend/src/internal/domain"
 	"backend/src/internal/model"
+	"slices"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -79,12 +80,19 @@ func (r *RosstatRepository) GetRosstatByCodeForLastYears(
 	db := conn.Get().(*gorm.DB)
 
 	var rosstatDAOs []model.Rosstat
-	err := db.Where("code = ? AND year IN ?", code, years).
+
+	err := db.Where("code = ?", code).
+		Order("year DESC").
+		Limit(years).
 		Find(&rosstatDAOs).Error
 
 	if err != nil {
 		return nil, err
 	}
+
+	slices.SortFunc(rosstatDAOs, func(a, b model.Rosstat) int {
+		return a.Year - b.Year
+	})
 
 	var modelObj model.Rosstat
 	return modelObj.ToDomainSlice(rosstatDAOs)
