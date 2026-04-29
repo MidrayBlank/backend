@@ -127,7 +127,7 @@ func (d *Dispatcher) fetchRequestsAndRunWorkers(ctx context.Context) {
 		return
 	}
 
-	d.requestAttemptsMap.Put(request.ID)
+	d.requestAttemptsMap.Put(request.ID, request.Attempts)
 
 	if err = d.requestsRepo.SetStatusAndIncrementById(ctx, txConn, request.ID, status.StatusInProgress); err != nil {
 		txConn.Rollback()

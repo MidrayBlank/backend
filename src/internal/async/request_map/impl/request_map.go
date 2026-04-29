@@ -13,11 +13,11 @@ func NewRequestAttemptsMap() RequestAttemptsMap {
 	}
 }
 
-func (ram *RequestAttemptsMap) Put(requestID int) {
+func (ram *RequestAttemptsMap) Put(requestID int, attempts int) {
 	ram.mu.Lock()
 	defer ram.mu.Unlock()
 
-	ram.data[requestID]++
+	ram.data[requestID] = attempts + 1
 }
 
 func (ram *RequestAttemptsMap) Get(requestID int) (int, bool) {
