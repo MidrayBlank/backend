@@ -44,6 +44,10 @@ func AskAIByCodeWorker(
 	prompt := buildAIPrompt(regionName, tableStats)
 
 	apiKey, err := getLessLoadedApiKey(conn, workerConfig)
+	if err != nil {
+		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
+		return
+	}
 	aiRouterClient := ai.NewAIOpenRouter(apiKey, workerConfig.AiModel, workerConfig.OpenRouterBaseURL)
 
 	response, err := aiRouterClient.SendRequest(prompt)
