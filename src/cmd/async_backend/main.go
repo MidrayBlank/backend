@@ -15,7 +15,7 @@ func main() {
 
 	conn := postgres.NewPostgresConnection(config.GetDBDSN())
 	requestsRepo := rimpl.NewAsyncRequesRepository()
-	workerRepositories := worker_config.NewWorkerConfig()
+	workerRepositories := worker_config.NewWorkerConfig(config.AiApiKey, config.AiModel, config.AiBaseUrl, config.AIReportYears)
 
 	dispatcher := dispatcher.NewDispatcher(conn, *requestsRepo, workerRepositories, config.DispatcherTimeSleep, config.DispatcherMaxAttempts, config.MaxWorkersCount)
 

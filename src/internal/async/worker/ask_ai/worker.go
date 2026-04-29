@@ -4,7 +4,6 @@ import (
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
 	worker_config "backend/src/internal/async/worker/config"
-	"backend/src/internal/config"
 	"backend/src/internal/db/abstract"
 	ai "backend/src/pkg/ai/openrouter"
 	"context"
@@ -21,9 +20,8 @@ func AskAIByCodeWorker(
 	regionCode int,
 ) {
 	defer sem.Release()
-	cfg := config.Load()
 
-	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, workerConfig, regionCode, cfg.AIReportYears)
+	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, workerConfig, regionCode, workerConfig.AiReportYears)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
@@ -38,7 +36,7 @@ func AskAIByCodeWorker(
 	tableStats := formatStatsForAI(rosstatStats, rosstatAgeStats)
 	prompt := buildAIPrompt(regionName, tableStats)
 
-	aiRouterClient := ai.NewAIOpenRouter(cfg.AiApiKey, cfg.AiModel, cfg.AiBaseUrl)
+	aiRouterClient := ai.NewAIOpenRouter(workerConfig.ApiKey, workerConfig.AiModel, workerConfig.OpenRouterBaseURL)
 
 	response, err := aiRouterClient.SendRequest(prompt)
 	if err != nil {

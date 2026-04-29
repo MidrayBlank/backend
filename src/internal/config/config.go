@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type Config struct {
 	DispatcherMaxAttempts int
 	DispatcherTimeSleep   time.Duration
 
-	AiApiKey      string
+	AiApiKey      []string
 	AiModel       string
 	AiBaseUrl     string
 	AIReportYears int
@@ -91,7 +92,7 @@ func Load() *Config {
 	}
 
 	if value := os.Getenv("OPENROUTER_API_KEY"); value != "" {
-		cfg.AiApiKey = value
+		cfg.AiApiKey = strings.Split(value, ",")
 	}
 
 	if value := os.Getenv("OPENROUTER_MODEL"); value != "" {
