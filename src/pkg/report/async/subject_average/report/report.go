@@ -24,17 +24,13 @@ func (r *SubjectAverageReportCompiler) Compile(ctx context.Context, data domain.
 
 	result := make(domain.RosstatSlice, 0, len(groups))
 
-	for subcode, municip := range groups {
+	for subjectcode, municip := range groups {
 		if err := ctx.Err(); err != nil {
 			return nil, ctx.Err()
 		}
 		year := municip[0].Year
-		regionRecord := buildRegionRecord(subcode, year, municip)
+		regionRecord := buildSubjectRecord(subjectcode, year, municip)
 		result = append(result, regionRecord)
-	}
-
-	if err := ctx.Err(); err != nil {
-		return nil, ctx.Err()
 	}
 
 	return result, nil

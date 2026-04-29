@@ -2,14 +2,7 @@ package report
 
 import "backend/src/pkg/report/async/subject_average/domain"
 
-func buildRegionRecord(subjectCode int, year int, municipalities domain.RosstatSlice) *domain.Rosstat {
-
-	allAgeGroups := make([][]*domain.RosstatAge, len(municipalities))
-
-	for i, m := range municipalities {
-		allAgeGroups[i] = m.ByAge
-	}
-
+func buildSubjectRecord(subjectCode int, year int, municipalities domain.RosstatSlice) *domain.Rosstat {
 	return &domain.Rosstat{
 		Code:                subjectCode,
 		SubjectCode:         subjectCode,
@@ -25,6 +18,6 @@ func buildRegionRecord(subjectCode int, year int, municipalities domain.RosstatS
 		MedicalFacilities:   aggregateMedicalFacilities(municipalities),
 		Schools:             aggregateSchools(municipalities),
 		HousingCommissioned: aggregateHousingCommissioned(municipalities),
-		ByAge:               aggregateByAge(allAgeGroups),
+		ByAge:               aggregateByAge(municipalities),
 	}
 }

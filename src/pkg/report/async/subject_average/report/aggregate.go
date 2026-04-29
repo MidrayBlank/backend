@@ -2,11 +2,11 @@ package report
 
 import "backend/src/pkg/report/async/subject_average/domain"
 
-func aggregateByAge(ageGroup [][]*domain.RosstatAge) []*domain.RosstatAge {
+func aggregateByAge(municipalities domain.RosstatSlice) []*domain.RosstatAge {
 	ages := make(map[int]*domain.RosstatAge)
 
-	for _, group := range ageGroup {
-		for _, ageItem := range group {
+	for _, municip := range municipalities {
+		for _, ageItem := range municip.ByAge {
 			if ageItem == nil {
 				continue
 			}
