@@ -7,7 +7,9 @@ import (
 	"backend/src/internal/db/abstract"
 	ai "backend/src/pkg/ai/openrouter"
 	"context"
+	"errors"
 	"log"
+	"slices"
 )
 
 func AskAIByCodeWorker(
@@ -36,7 +38,8 @@ func AskAIByCodeWorker(
 	tableStats := formatStatsForAI(rosstatStats, rosstatAgeStats)
 	prompt := buildAIPrompt(regionName, tableStats)
 
-	aiRouterClient := ai.NewAIOpenRouter(workerConfig.AiApiKeys, workerConfig.AiModel, workerConfig.OpenRouterBaseURL)
+	apiKey, err := getLessLoadedApiKey(conn, workerConfig)
+	aiRouterClient := ai.NewAIOpenRouter(apiKey, workerConfig.AiModel, workerConfig.OpenRouterBaseURL)
 
 	response, err := aiRouterClient.SendRequest(prompt)
 	if err != nil {
@@ -50,12 +53,41 @@ func AskAIByCodeWorker(
 		return
 	}
 
-	err = workerConfig.AiApiRepository.IncreaseRequests(conn, workerConfig.ApiKeys)
+	err = workerConfig.AiApiRepository.IncreaseRequests(conn, apiKey)
 	if err != nil {
 		log.Printf("Failed to increase count of requests: %v", err)
 	}
 
 	ch <- status.CompletionStatus{RequestId: requestId, Err: nil}
+}
+
+func getLessLoadedApiKey(
+	conn abstract.IDBConnection,
+	workerConfig worker_config.WorkerConfig,
+) (string, error) {
+	aiApies, err := workerConfig.AiApiRepository.GetAllRequestsCount(conn, workerConfig.ApiKeys)
+	if err != nil {
+		return "", err
+	}
+	if len(aiApies) == 0 {
+		return "", errors.New("founded 0 api keys")
+	}
+
+	requestsSlice := make([]int, 0, len(aiApies))
+	for _, aiApi := range aiApies {
+		if aiApi.Requests == 0 {
+			return aiApi.Token, nil
+		}
+		requestsSlice = append(requestsSlice, aiApi.Requests)
+	}
+
+	minRequestsCount := slices.Min(requestsSlice)
+	for _, aiApi := range aiApies {
+		if aiApi.Requests == minRequestsCount {
+			return aiApi.Token, nil
+		}
+	}
+	return "", nil
 }
 
 func getRegionName(

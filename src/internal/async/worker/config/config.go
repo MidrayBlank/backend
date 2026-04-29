@@ -13,14 +13,14 @@ type WorkerConfig struct {
 	AiApiRepository    abstract.IAiApiRepository
 	AiReportRepository abstract.IAiReportRepository
 
-	ApiKey            []string
+	ApiKeys           []string
 	AiModel           string
 	OpenRouterBaseURL string
 	AiReportYears     int
 }
 
 func NewWorkerConfig(
-	apiKey []string,
+	apiKeys []string,
 	aiModel string,
 	openRoterBaseURL string,
 	aiReportYears int,
@@ -32,7 +32,7 @@ func NewWorkerConfig(
 		AiApiRepository:      impl.NewAiApiRepository(),
 		AiReportRepository:   impl.NewAiReportRepository(),
 
-		ApiKey:            apiKey,
+		ApiKeys:           apiKeys,
 		AiModel:           aiModel,
 		OpenRouterBaseURL: openRoterBaseURL,
 		AiReportYears:     aiReportYears,
