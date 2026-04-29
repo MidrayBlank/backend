@@ -30,7 +30,7 @@ func groupGeoByParent(geoList []domain.Geo) ([]domain.Geo, map[int][]domain.Geo)
 	childMap := make(map[int][]domain.Geo)
 
 	for _, geo := range geoList {
-		if geo.ParentCode == nil {
+		if geo.ParentCode == nil || *geo.ParentCode == 0 {
 			federalSubjects = append(federalSubjects, geo)
 		} else {
 			childMap[*geo.ParentCode] = append(childMap[*geo.ParentCode], geo)
