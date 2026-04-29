@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"slices"
 )
 
 func AskAIByCodeWorker(
@@ -82,21 +81,20 @@ func getLessLoadedApiKey(
 		return "", errors.New("founded 0 api keys")
 	}
 
-	requestsSlice := make([]int, 0, len(aiApies))
-	for _, aiApi := range aiApies {
+	lessLoadedKeyIndex := 0
+	minCountOfRequests := aiApies[0].Requests
+
+	for i, aiApi := range aiApies {
 		if aiApi.Requests == 0 {
 			return aiApi.Token, nil
 		}
-		requestsSlice = append(requestsSlice, aiApi.Requests)
-	}
-
-	minRequestsCount := slices.Min(requestsSlice)
-	for _, aiApi := range aiApies {
-		if aiApi.Requests == minRequestsCount {
-			return aiApi.Token, nil
+		if aiApi.Requests < minCountOfRequests {
+			lessLoadedKeyIndex = i
+			minCountOfRequests = aiApi.Requests
 		}
 	}
-	return "", nil
+	return aiApies[lessLoadedKeyIndex].Token, nil
+
 }
 
 func getRegionName(
