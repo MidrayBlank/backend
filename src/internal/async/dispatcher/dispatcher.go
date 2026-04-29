@@ -75,25 +75,26 @@ func (d *Dispatcher) ProcessCompletion(ctx context.Context) {
 				attempts, exists := d.requestAttemptsMap.Get(completionStatus.RequestId)
 				if !exists {
 					log.Printf("request %d not found", completionStatus.RequestId)
+					continue
 				}
 
 				if attempts >= d.maxAttempts {
 					if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusFailed); err != nil {
 						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
 
-					} else {
-						if err := d.requestsRepo.SetStatusAndIncrementById(ctx, d.conn, completionStatus.RequestId, status.StatusQueued); err != nil {
-							log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
-						}
 					}
-
 				} else {
-					if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusSuccess); err != nil {
+					if err := d.requestsRepo.SetStatusAndIncrementById(ctx, d.conn, completionStatus.RequestId, status.StatusQueued); err != nil {
 						log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
 					}
 				}
 
+			} else {
+				if err := d.requestsRepo.SetStatusById(ctx, d.conn, completionStatus.RequestId, status.StatusSuccess); err != nil {
+					log.Printf("can not set status for request %d: %v", completionStatus.RequestId, err)
+				}
 			}
+
 		default:
 			if err := d.requestsRepo.CloseTimeoutRequests(ctx, d.conn); err != nil {
 				log.Printf("error closing timeout requests: %v", err)
