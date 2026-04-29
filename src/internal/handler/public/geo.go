@@ -21,6 +21,8 @@ func buildGeoResponse(geoList []domain.Geo) (dto.GeoResponse, error) {
 	federalSubjects, childMap := groupGeoByParent(geoList)
 
 	return dto.GeoResponse{
+		Name:            "Российская Федерация",
+		Code:            0,
 		FederalSubjects: buildFederalSubjects(federalSubjects, childMap),
 	}, nil
 }
