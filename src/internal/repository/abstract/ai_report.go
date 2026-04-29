@@ -5,7 +5,7 @@ import (
 	"backend/src/internal/domain"
 )
 
-type IAIReportRepository interface {
+type IAiReportRepository interface {
 	Upsert(conn abstract.IDBConnection, code int, report string) error
 	GetReportByCode(conn abstract.IDBConnection, code int) (*domain.AiReport, error)
 }

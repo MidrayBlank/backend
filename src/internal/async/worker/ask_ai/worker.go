@@ -45,6 +45,12 @@ func AskAIByCodeWorker(
 		return
 	}
 
+	err = repositories.AiReportRepository.Upsert(conn, regionCode, response)
+	if err != nil {
+		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
+		return
+	}
+
 	err = repositories.AiApiRepository.IncreaseRequests(conn, cfg.AiApiKey)
 	if err != nil {
 		log.Printf("Failed to increase count of requests: %v", err)

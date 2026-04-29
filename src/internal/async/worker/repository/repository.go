@@ -10,7 +10,8 @@ type WorkerRepositories struct {
 	RosstatRepository    abstract.IRosstatRepository
 	RosstatAgeRepository abstract.IRosstatAgeRepository
 
-	AiApiRepository abstract.IAiApiRepository
+	AiApiRepository    abstract.IAiApiRepository
+	AiReportRepository abstract.IAiReportRepository
 }
 
 func NewWorkerRepositories() WorkerRepositories {
@@ -19,5 +20,6 @@ func NewWorkerRepositories() WorkerRepositories {
 		RosstatRepository:    impl.NewRosstatRepository(),
 		RosstatAgeRepository: impl.NewRosstatAgeRepository(),
 		AiApiRepository:      impl.NewAiApiRepository(),
+		AiReportRepository:   impl.NewAiReportRepository(),
 	}
 }
