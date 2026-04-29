@@ -1,6 +1,6 @@
 package report
 
-import "backend/src/pkg/report/population_growth/domain"
+import "backend/src/pkg/report/sync/population_growth/domain"
 
 type PopulationGrowthReportCompiler struct{}
 
