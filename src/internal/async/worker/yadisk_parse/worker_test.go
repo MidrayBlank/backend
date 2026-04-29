@@ -6,7 +6,7 @@ import (
 
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
-	"backend/src/internal/async/worker/repository"
+	"backend/src/internal/async/worker/config"
 	"backend/src/internal/async/worker/yadisk_parse"
 	"backend/src/internal/db/postgres"
 	"backend/src/internal/repository/impl"
@@ -17,7 +17,7 @@ func TestPopulation(t *testing.T) {
 	ch := make(chan status.CompletionStatus)
 	sem := semaphore.NewSemaphore(3)
 	conn := postgres.NewPostgresConnection("postgresql://test_user:123@127.0.0.1:5432/test_db?sslmode=disable")
-	repositories := repository.WorkerRepositories{
+	repositories := config.WorkerConfig{
 		GeoRepository:        impl.NewGeoRepository(),
 		RosstatRepository:    impl.NewRosstatRepository(),
 		RosstatAgeRepository: impl.NewRosstatAgeRepository(),

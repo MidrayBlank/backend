@@ -1,11 +1,11 @@
-package repository
+package config
 
 import (
 	"backend/src/internal/repository/abstract"
 	"backend/src/internal/repository/impl"
 )
 
-type WorkerRepositories struct {
+type WorkerConfig struct {
 	GeoRepository        abstract.IGeoRepository
 	RosstatRepository    abstract.IRosstatRepository
 	RosstatAgeRepository abstract.IRosstatAgeRepository
@@ -14,8 +14,8 @@ type WorkerRepositories struct {
 	AiReportRepository abstract.IAiReportRepository
 }
 
-func NewWorkerRepositories() WorkerRepositories {
-	return WorkerRepositories{
+func NewWorkerConfig() WorkerConfig {
+	return WorkerConfig{
 		GeoRepository:        impl.NewGeoRepository(),
 		RosstatRepository:    impl.NewRosstatRepository(),
 		RosstatAgeRepository: impl.NewRosstatAgeRepository(),

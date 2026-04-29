@@ -3,7 +3,7 @@ package ask_ai
 import (
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
-	"backend/src/internal/async/worker/repository"
+	worker_config "backend/src/internal/async/worker/config"
 	"backend/src/internal/config"
 	"backend/src/internal/db/abstract"
 	ai "backend/src/pkg/ai/openrouter"
@@ -16,20 +16,20 @@ func AskAIByCodeWorker(
 	ch chan status.CompletionStatus,
 	sem semaphore.Semaphore,
 	conn abstract.IDBConnection,
-	repositories repository.WorkerRepositories,
+	workerConfig worker_config.WorkerConfig,
 	requestId int,
 	regionCode int,
 ) {
 	defer sem.Release()
 	cfg := config.Load()
 
-	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, repositories, regionCode, cfg.AIReportYears)
+	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, workerConfig, regionCode, cfg.AIReportYears)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
 	}
 
-	regionName, err := getRegionName(conn, repositories, regionCode)
+	regionName, err := getRegionName(conn, workerConfig, regionCode)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
@@ -46,13 +46,13 @@ func AskAIByCodeWorker(
 		return
 	}
 
-	err = repositories.AiReportRepository.Upsert(conn, regionCode, response)
+	err = workerConfig.AiReportRepository.Upsert(conn, regionCode, response)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
 	}
 
-	err = repositories.AiApiRepository.IncreaseRequests(conn, cfg.AiApiKey)
+	err = workerConfig.AiApiRepository.IncreaseRequests(conn, cfg.AiApiKey)
 	if err != nil {
 		log.Printf("Failed to increase count of requests: %v", err)
 	}
@@ -62,10 +62,10 @@ func AskAIByCodeWorker(
 
 func getRegionName(
 	conn abstract.IDBConnection,
-	repositories repository.WorkerRepositories,
+	workerConfig worker_config.WorkerConfig,
 	code int,
 ) (string, error) {
-	geo, err := repositories.GeoRepository.GetGeoByCode(conn, code)
+	geo, err := workerConfig.GeoRepository.GetGeoByCode(conn, code)
 	if err != nil {
 		return "", err
 	}

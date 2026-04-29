@@ -1,7 +1,7 @@
 package ask_ai
 
 import (
-	"backend/src/internal/async/worker/repository"
+	"backend/src/internal/async/worker/config"
 	"backend/src/internal/db/abstract"
 	"backend/src/internal/domain"
 	"context"
@@ -18,11 +18,11 @@ type AgeGroup struct {
 func prepareStatistics(
 	ctx context.Context,
 	conn abstract.IDBConnection,
-	repositories repository.WorkerRepositories,
+	workerConfig config.WorkerConfig,
 	code int,
 	years int,
 ) ([]*domain.Rosstat, []*domain.RosstatByAge, error) {
-	rosstat, err := repositories.RosstatRepository.GetRosstatByCodeForLastYears(conn, code, years)
+	rosstat, err := workerConfig.RosstatRepository.GetRosstatByCodeForLastYears(conn, code, years)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -32,7 +32,7 @@ func prepareStatistics(
 		rosstatIDs = append(rosstatIDs, r.ID)
 	}
 
-	rosstatAge, err := repositories.RosstatAgeRepository.GetRosstatAgeByRosstatIDs(conn, rosstatIDs)
+	rosstatAge, err := workerConfig.RosstatAgeRepository.GetRosstatAgeByRosstatIDs(conn, rosstatIDs)
 	if err != nil {
 		return nil, nil, err
 	}

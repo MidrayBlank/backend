@@ -7,7 +7,7 @@ import (
 
 	"backend/src/internal/async/semaphore"
 	"backend/src/internal/async/status"
-	"backend/src/internal/async/worker/repository"
+	"backend/src/internal/async/worker/config"
 	"backend/src/internal/db/abstract"
 	"backend/src/internal/domain"
 
@@ -22,7 +22,7 @@ func YadiskParseWorker(
 	ch chan status.CompletionStatus,
 	sem semaphore.Semaphore,
 	conn abstract.IDBConnection,
-	repositories repository.WorkerRepositories,
+	workerConfig config.WorkerConfig,
 	requestId int,
 	param int,
 ) {
@@ -38,7 +38,7 @@ func YadiskParseWorker(
 	}
 
 	log.Printf("Upsert GEO...\n")
-	if err := batchUpsertGeo(ctx, conn, repositories, rosstatParsedSlice); err != nil {
+	if err := batchUpsertGeo(ctx, conn, workerConfig, rosstatParsedSlice); err != nil {
 		log.Printf("Request %d failed in upsertGeo: %v\n", requestId, err)
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
@@ -125,7 +125,7 @@ func YadiskParseWorker(
 	}
 	allRosstat = append(allRosstat, rfRosstat)
 
-	if err := batchUpsertRosstat(ctx, conn, repositories, allRosstat); err != nil {
+	if err := batchUpsertRosstat(ctx, conn, workerConfig, allRosstat); err != nil {
 		log.Printf("Request %d failed during batch upsert Rosstat: %v\n", requestId, err)
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
@@ -139,7 +139,7 @@ func YadiskParseWorker(
 	for c := range codesSet {
 		codes = append(codes, c)
 	}
-	rosstatList, err := repositories.RosstatRepository.GetRosstatByCodes(conn, codes)
+	rosstatList, err := workerConfig.RosstatRepository.GetRosstatByCodes(conn, codes)
 	if err != nil {
 		log.Printf("Request %d failed to fetch Rosstat IDs: %v\n", requestId, err)
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
@@ -200,7 +200,7 @@ func YadiskParseWorker(
 		}
 	}
 
-	if err := batchUpsertRosstatAge(ctx, conn, repositories, allAge); err != nil {
+	if err := batchUpsertRosstatAge(ctx, conn, workerConfig, allAge); err != nil {
 		log.Printf("Request %d failed during batch upsert RosstatByAge: %v\n", requestId, err)
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
@@ -212,7 +212,7 @@ func YadiskParseWorker(
 func batchUpsertGeo(
 	ctx context.Context,
 	conn abstract.IDBConnection,
-	repos repository.WorkerRepositories,
+	workerConfig config.WorkerConfig,
 	parsedSlice parser.RosstatParsedSlice,
 ) error {
 	if err := ctx.Err(); err != nil {
@@ -242,7 +242,7 @@ func batchUpsertGeo(
 			end = len(allGeo)
 		}
 		batch := allGeo[i:end]
-		if err := repos.GeoRepository.UpsertBatch(conn, batch); err != nil {
+		if err := workerConfig.GeoRepository.UpsertBatch(conn, batch); err != nil {
 			return fmt.Errorf("geo upsert batch: %w", err)
 		}
 	}
@@ -353,7 +353,7 @@ func aggregateRF(subjectAggs map[int]*aggregatedData) (*aggregatedData, error) {
 func batchUpsertRosstat(
 	ctx context.Context,
 	conn abstract.IDBConnection,
-	repos repository.WorkerRepositories,
+	workerConfig config.WorkerConfig,
 	rosstatList []*domain.Rosstat,
 ) error {
 	if err := ctx.Err(); err != nil {
@@ -365,7 +365,7 @@ func batchUpsertRosstat(
 			end = len(rosstatList)
 		}
 		batch := rosstatList[i:end]
-		if err := repos.RosstatRepository.UpsertBatch(conn, batch); err != nil {
+		if err := workerConfig.RosstatRepository.UpsertBatch(conn, batch); err != nil {
 			return fmt.Errorf("rosstat upsert batch: %w", err)
 		}
 	}
@@ -375,7 +375,7 @@ func batchUpsertRosstat(
 func batchUpsertRosstatAge(
 	ctx context.Context,
 	conn abstract.IDBConnection,
-	repos repository.WorkerRepositories,
+	workerConfig config.WorkerConfig,
 	ageList []*domain.RosstatByAge,
 ) error {
 	if err := ctx.Err(); err != nil {
@@ -387,7 +387,7 @@ func batchUpsertRosstatAge(
 			end = len(ageList)
 		}
 		batch := ageList[i:end]
-		if err := repos.RosstatAgeRepository.UpsertBatch(conn, batch); err != nil {
+		if err := workerConfig.RosstatAgeRepository.UpsertBatch(conn, batch); err != nil {
 			return fmt.Errorf("rosstat age upsert batch: %w", err)
 		}
 	}
