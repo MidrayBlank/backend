@@ -82,15 +82,10 @@ func getLessLoadedApiKey(
 	}
 
 	lessLoadedKeyIndex := 0
-	minCountOfRequests := aiApies[0].Requests
 
 	for i, aiApi := range aiApies {
-		if aiApi.Requests == 0 {
-			return aiApi.Token, nil
-		}
-		if aiApi.Requests < minCountOfRequests {
+		if aiApi.Requests < aiApies[lessLoadedKeyIndex].Requests {
 			lessLoadedKeyIndex = i
-			minCountOfRequests = aiApi.Requests
 		}
 	}
 	return aiApies[lessLoadedKeyIndex].Token, nil
