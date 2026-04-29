@@ -23,6 +23,11 @@ func AskAIByCodeWorker(
 ) {
 	defer sem.Release()
 
+	if err := workerConfig.AiApiRepository.InsertIfNotExist(conn, workerConfig.ApiKeys); err != nil {
+		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
+		return
+	}
+
 	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, workerConfig, regionCode, workerConfig.AiReportYears)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
