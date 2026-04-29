@@ -18,7 +18,7 @@ func NewAiReportRepository() *AiReportRepository {
 func (r *AiReportRepository) Upsert(conn abstract.IDBConnection, code int, report string) error {
 	db := conn.Get().(*gorm.DB)
 
-	aiReportDAO := model.ToReportModel(code, report)
+	aiReportDAO := model.NewAiReport(code, report)
 
 	return db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "code"}},

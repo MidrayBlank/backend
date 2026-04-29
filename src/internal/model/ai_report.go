@@ -13,7 +13,7 @@ func (modelObj *AiReport) ToDomain() (*domain.AiReport, error) {
 	return ToDomain[AiReport, domain.AiReport](modelObj)
 }
 
-func ToReportModel(code int, report string) *AiReport {
+func NewAiReport(code int, report string) *AiReport {
 	return &AiReport{
 		Code:   code,
 		Report: report,
