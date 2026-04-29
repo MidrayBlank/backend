@@ -21,8 +21,6 @@ func buildGeoResponse(geoList []domain.Geo) (dto.GeoResponse, error) {
 	federalSubjects, childMap := groupGeoByParent(geoList)
 
 	return dto.GeoResponse{
-		Name:            "Российская Федерация",
-		Code:            0,
 		FederalSubjects: buildFederalSubjects(federalSubjects, childMap),
 	}, nil
 }
@@ -32,6 +30,10 @@ func groupGeoByParent(geoList []domain.Geo) ([]domain.Geo, map[int][]domain.Geo)
 	childMap := make(map[int][]domain.Geo)
 
 	for _, geo := range geoList {
+		if geo.Code == 0 {
+			continue
+		}
+
 		if geo.ParentCode == nil || *geo.ParentCode == 0 {
 			federalSubjects = append(federalSubjects, geo)
 		} else {
