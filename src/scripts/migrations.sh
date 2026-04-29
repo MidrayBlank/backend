@@ -19,7 +19,7 @@ OPTIONS:
     exit
 elif [ "$1" = "--new" ] || [ "$1" = "-n" ]; then
     if [ -n "$2" ]; then
-        goose -dir migrations create $2 sql
+        goose -dir migration create $2 sql
         exit
     else
         echo "ERROR: forgot to add name"

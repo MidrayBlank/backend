@@ -13,17 +13,18 @@ paths:
       summary: Получение древовидной структуры РФ.
       description: |
         Древовидная структура представлена в виде:
-        1. РФ
-        2. Субъект РФ
-        3. Муниципалитет верхнего уровня
-        4. Муниципалитет нижнего уровня.
+        1. Субъект РФ
+        2. Муниципалитет верхнего уровня
+        3. Муниципалитет нижнего уровня.
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GeoResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/FederalSubject'
 
   /api/v1/rosstat:
     get:
@@ -37,7 +38,7 @@ paths:
             type: array
             items:
               type: string
-              enum: [population, birth, death, arrival, departure, age,
+              enum: [year, population, birth, death, arrival, departure, age,
                     male, female, land_area, avg_salary,
                     medicial_facilities, schools, housing_commissioned] 
           style: form
@@ -134,28 +135,6 @@ components:
         - name
         - code
         - upper_municipalities
-
-    GeoResponse:
-      type: object
-      description: Древовидная структура РФ.
-      properties:
-        name:
-          type: string
-          description: Название страны.
-          example: Российская Федерация
-        code:
-          type: integer
-          description: Код страны.
-          example: 0
-        federal_subjects:
-          type: array
-          description: Список субъектов РФ.
-          items:
-            $ref: '#/components/schemas/FederalSubject'
-      required:
-        - name
-        - code
-        - federal_subjects
         
     RosstatByAge:
       type: object
@@ -177,6 +156,9 @@ components:
     RosstatByYear:
       type: object
       properties:
+        year:
+          type: integer
+          description: Указанный год
         population:
           type: integer
           description: Численность населения за указанный год.

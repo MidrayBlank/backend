@@ -4,6 +4,7 @@ import (
 	"backend/src/internal/db/abstract"
 	"backend/src/internal/domain"
 	"backend/src/internal/model"
+	"slices"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -34,6 +35,29 @@ func (r *RosstatRepository) Upsert(conn abstract.IDBConnection, rosstat *domain.
 	}).Create(rosstatDAO).Error
 }
 
+func (r *RosstatRepository) UpsertBatch(conn abstract.IDBConnection, rosstats []*domain.Rosstat) error {
+	db := conn.Get().(*gorm.DB)
+
+	rosstatDAO := &model.Rosstat{}
+	rosstatDAOs := make([]*model.Rosstat, 0, len(rosstats))
+	for _, rs := range rosstats {
+		populated, err := rosstatDAO.ToModel(rs)
+		if err != nil {
+			return err
+		}
+		rosstatDAOs = append(rosstatDAOs, populated)
+	}
+
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "code"},
+			{Name: "year"},
+		},
+		UpdateAll: true,
+	}).
+		Create(&rosstatDAOs).Error
+}
+
 func (r *RosstatRepository) GetRosstatByCodes(conn abstract.IDBConnection, codes []int) ([]*domain.Rosstat, error) {
 	db := conn.Get().(*gorm.DB)
 
@@ -43,6 +67,32 @@ func (r *RosstatRepository) GetRosstatByCodes(conn abstract.IDBConnection, codes
 	if err != nil {
 		return nil, err
 	}
+
+	var modelObj model.Rosstat
+	return modelObj.ToDomainSlice(rosstatDAOs)
+}
+
+func (r *RosstatRepository) GetRosstatByCodeForLastYears(
+	conn abstract.IDBConnection,
+	code int,
+	years int,
+) ([]*domain.Rosstat, error) {
+	db := conn.Get().(*gorm.DB)
+
+	var rosstatDAOs []model.Rosstat
+
+	err := db.Where("code = ?", code).
+		Order("year DESC").
+		Limit(years).
+		Find(&rosstatDAOs).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	slices.SortFunc(rosstatDAOs, func(a, b model.Rosstat) int {
+		return a.Year - b.Year
+	})
 
 	var modelObj model.Rosstat
 	return modelObj.ToDomainSlice(rosstatDAOs)

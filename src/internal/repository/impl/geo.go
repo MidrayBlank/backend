@@ -33,6 +33,26 @@ func (r *GeoRepository) Upsert(conn abstract.IDBConnection, geo *domain.Geo) err
 
 }
 
+func (r *GeoRepository) UpsertBatch(conn abstract.IDBConnection, geos []*domain.Geo) error {
+	db := conn.Get().(*gorm.DB)
+
+	geoDAO := &model.Geo{}
+	geoDAOs := make([]*model.Geo, 0, len(geos))
+	for _, geo := range geos {
+		populated, err := geoDAO.ToModel(geo)
+		if err != nil {
+			return err
+		}
+		geoDAOs = append(geoDAOs, populated)
+	}
+
+	return db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "code"}},
+		UpdateAll: true,
+	}).
+		Create(&geoDAOs).Error
+}
+
 func (r *GeoRepository) GetGeoAll(conn abstract.IDBConnection) ([]*domain.Geo, error) {
 	db := conn.Get().(*gorm.DB)
 
@@ -45,4 +65,17 @@ func (r *GeoRepository) GetGeoAll(conn abstract.IDBConnection) ([]*domain.Geo, e
 
 	var modelObj model.Geo
 	return modelObj.ToDomainSlice(geoDAOs)
+}
+
+func (r *GeoRepository) GetGeoByCode(conn abstract.IDBConnection, code int) (*domain.Geo, error) {
+	db := conn.Get().(*gorm.DB)
+
+	var geoDAO model.Geo
+	err := db.Where("code = ?", code).First(&geoDAO).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return geoDAO.ToDomain()
 }

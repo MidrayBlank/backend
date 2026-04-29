@@ -3,6 +3,8 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type Config struct {
@@ -12,6 +14,15 @@ type Config struct {
 	DBHost     string
 	DBPort     int
 	ServerPort int
+
+	MaxWorkersCount       int
+	DispatcherMaxAttempts int
+	DispatcherTimeSleep   time.Duration
+
+	AiApiKeys     []string
+	AiModel       string
+	AiBaseUrl     string
+	AIReportYears int
 }
 
 func Load() *Config {
@@ -22,6 +33,14 @@ func Load() *Config {
 		DBHost:     "localhost",
 		DBPort:     5432,
 		ServerPort: 8080,
+
+		MaxWorkersCount:       3,
+		DispatcherMaxAttempts: 3,
+		DispatcherTimeSleep:   5 * time.Second,
+
+		AIReportYears: 5,
+		AiModel:       "openrouter/free",
+		AiBaseUrl:     "https://openrouter.ai/api/v1",
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
@@ -49,6 +68,42 @@ func Load() *Config {
 	if value := os.Getenv("SERVER_PORT"); value != "" {
 		if port, err := strconv.Atoi(value); err == nil {
 			cfg.ServerPort = port
+		}
+	}
+
+	if value := os.Getenv("MAX_WORKERS_COUNT"); value != "" {
+		if maxWorkersCount, err := strconv.Atoi(value); err == nil {
+			cfg.MaxWorkersCount = maxWorkersCount
+		}
+	}
+
+	if value := os.Getenv("DISPATCHER_MAX_ATTEMPTS_COUNT"); value != "" {
+		if maxAttemptsCount, err := strconv.Atoi(value); err == nil {
+			cfg.DispatcherMaxAttempts = maxAttemptsCount
+		}
+	}
+
+	if value := os.Getenv("DISPATCHER_TIME_SLEEP_SECONDS"); value != "" {
+		if seconds, err := strconv.Atoi(value); err == nil {
+			cfg.DispatcherTimeSleep = time.Duration(seconds)
+		}
+	}
+
+	if value := os.Getenv("OPENROUTER_BASE_URL"); value != "" {
+		cfg.AiBaseUrl = value
+	}
+
+	if value := os.Getenv("OPENROUTER_API_KEYS"); value != "" {
+		cfg.AiApiKeys = strings.Split(value, ",")
+	}
+
+	if value := os.Getenv("OPENROUTER_MODEL"); value != "" {
+		cfg.AiModel = value
+	}
+
+	if value := os.Getenv("AI_REPORT_YEARS"); value != "" {
+		if years, err := strconv.Atoi(value); err == nil {
+			cfg.AIReportYears = years
 		}
 	}
 

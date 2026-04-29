@@ -10,6 +10,7 @@ import (
 	"backend/src/internal/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AiApiRepository struct{}
@@ -27,8 +28,7 @@ func (r *AiApiRepository) Insert(conn abstract.IDBConnection, token string) erro
 	db := conn.Get().(*gorm.DB)
 	hash := r.hashToken(token)
 
-	dao := &model.AiApi{}
-	dao, err := dao.ToModel(hash)
+	dao, err := model.NewAiApiModel(hash)
 	if err != nil {
 		return err
 	}
@@ -84,4 +84,29 @@ func (r *AiApiRepository) ResetAllRequestsCount(conn abstract.IDBConnection) err
 
 	return db.Model(&model.AiApi{}).
 		Update("requests", 0).Error
+}
+
+func (r *AiApiRepository) InsertIfNotExist(conn abstract.IDBConnection, tokens []string) error {
+	db := conn.Get().(*gorm.DB)
+
+	hashedTokens := make([]string, 0, len(tokens))
+	for _, token := range tokens {
+		hash := r.hashToken(token)
+		hashedTokens = append(hashedTokens, hash)
+	}
+
+	records := make([]model.AiApi, 0, len(tokens))
+	for i := range tokens {
+		hash := hashedTokens[i]
+		dao, err := model.NewAiApiModel(hash)
+		if err != nil {
+			return err
+		}
+		records = append(records, *dao)
+	}
+
+	return db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "hash"}},
+		DoNothing: true,
+	}).Create(&records).Error
 }
