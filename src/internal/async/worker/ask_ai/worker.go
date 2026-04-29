@@ -94,7 +94,6 @@ func getLessLoadedApiKey(
 		}
 	}
 	return aiApies[lessLoadedKeyIndex].Token, nil
-
 }
 
 func getRegionName(

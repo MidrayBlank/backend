@@ -1,6 +1,4 @@
 -- +goose Up
-CREATE SCHEMA IF NOT EXISTS midray;
-
 CREATE TABLE IF NOT EXISTS midray.ai_report (
     code        INTEGER     PRIMARY KEY,
     report      TEXT        NOT NULL
