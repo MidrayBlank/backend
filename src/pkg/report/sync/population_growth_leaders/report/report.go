@@ -1,10 +1,10 @@
 package report
 
 import (
+  "sort"
+
 	"backend/src/pkg/report/sync/population_growth_leaders/domain"
 	"backend/src/pkg/report/sync/population_growth_leaders/dto"
-
-	"sort"
 )
 
 type GrowthLeadersReportCompiler struct{}
