@@ -6,11 +6,10 @@ func aggregateByAge(municipalities domain.RosstatSlice) []*domain.RosstatAge {
 	ages := make(map[int]*domain.RosstatAge)
 
 	for _, municip := range municipalities {
+		if municip.ByAge == nil {
+			continue
+		}
 		for _, ageItem := range municip.ByAge {
-			if ageItem == nil {
-				continue
-			}
-
 			if _, exists := ages[ageItem.Age]; !exists {
 				ages[ageItem.Age] = &domain.RosstatAge{
 					Age:    ageItem.Age,
