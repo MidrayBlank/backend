@@ -1,7 +1,7 @@
 package aggregator
 
 import (
-	"backend/src/internal/domain/pkg/async/report/domain"
+	"backend/src/pkg/report/async/domain"
 	"context"
 )
 

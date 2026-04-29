@@ -19,7 +19,7 @@ type Rosstat struct {
 	Female              *int
 	LandArea            *int
 	AverageSalary       *float64
-	MedicialFacilities  *int
+	MedicalFacilities   *int
 	Schools             *int
 	HousingCommissioned *int
 	ByAge               []*RosstatAge
