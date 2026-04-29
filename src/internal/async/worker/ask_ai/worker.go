@@ -21,8 +21,9 @@ func AskAIByCodeWorker(
 	regionCode int,
 ) {
 	defer sem.Release()
+	cfg := config.Load()
 
-	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, repositories, regionCode)
+	rosstatStats, rosstatAgeStats, err := prepareStatistics(ctx, conn, repositories, regionCode, cfg.AIReportYears)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
@@ -37,7 +38,6 @@ func AskAIByCodeWorker(
 	tableStats := formatStatsForAI(rosstatStats, rosstatAgeStats)
 	prompt := buildAIPrompt(regionName, tableStats)
 
-	cfg := config.Load()
 	aiRouterClient := ai.NewAIOpenRouter(cfg.AiApiKey, cfg.AiModel, cfg.AiBaseUrl)
 
 	response, err := aiRouterClient.SendRequest(prompt)

@@ -20,6 +20,7 @@ func prepareStatistics(
 	conn abstract.IDBConnection,
 	repositories repository.WorkerRepositories,
 	code int,
+	years int,
 ) ([]*domain.Rosstat, []*domain.RosstatByAge, error) {
 	rosstat, err := repositories.RosstatRepository.GetRosstatByCodeForLastYears(conn, code, years)
 	if err != nil {
