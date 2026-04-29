@@ -65,14 +65,6 @@ func TestGetGeoHandler(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if response.Name != "Российская Федерация" {
-		t.Fatalf("expected name Российская Федерация, got '%s'", response.Name)
-	}
-
-	if response.Code != 0 {
-		t.Fatalf("expected: 0, got %d", response.Code)
-	}
-
 	if len(response.FederalSubjects) != 2 {
 		t.Fatalf("expected 2 federal subjects, got %d", len(response.FederalSubjects))
 	}

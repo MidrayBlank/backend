@@ -1,6 +1,6 @@
 package report
 
-import "backend/src/pkg/report/key_demographic_indicators/domain"
+import "backend/src/pkg/report/sync/key_demographic_indicators/domain"
 
 type DemographicReportCompiler struct{}
 

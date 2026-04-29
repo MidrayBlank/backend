@@ -44,6 +44,9 @@ func toRosstatByYear(data domain.RosstatByYear, fields []string) dto.RosstatByYe
 
 	for _, field := range fields {
 		switch field {
+		case "year":
+			byYear.Year = data.Year
+
 		case "population":
 			byYear.Population = data.PopulationAmount
 
