@@ -1,5 +1,10 @@
 -- +goose Up
-SELECT 'up SQL query';
+CREATE SCHEMA IF NOT EXISTS midray;
+
+CREATE TABLE IF NOT EXISTS midray.ai_report (
+    code        INTEGER     PRIMARY KEY,
+    report      TEXT        NOT NULL
+);
 
 -- +goose Down
-SELECT 'down SQL query';
+DROP TABLE IF EXISTS midray.ai_report;
