@@ -45,5 +45,12 @@ func buildAsyncReportResponse(ctx context.HandlerContext, report *domain.AiRepor
 func PutReportAsyncHandler(ctx context.HandlerContext,
 	aiReportAsyncService service.IAiReportAsyncService,
 ) dto.CreateReportResponse {
-
+	var request dto.CreateReportRequest
+	if err := ctx.BindJSON(&req); err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return dto.CreateReportResponse{
+			Hash:    "",
+			Message: "invalid request body",
+		}
+	}
 }
