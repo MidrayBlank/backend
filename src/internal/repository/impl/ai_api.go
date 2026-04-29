@@ -28,8 +28,7 @@ func (r *AiApiRepository) Insert(conn abstract.IDBConnection, token string) erro
 	db := conn.Get().(*gorm.DB)
 	hash := r.hashToken(token)
 
-	dao := &model.AiApi{}
-	dao, err := dao.NewAiApiModel(hash)
+	dao, err := model.NewAiApiModel(hash)
 	if err != nil {
 		return err
 	}
@@ -99,8 +98,7 @@ func (r *AiApiRepository) InsertIfNotExist(conn abstract.IDBConnection, tokens [
 	records := make([]model.AiApi, 0, len(tokens))
 	for i := range tokens {
 		hash := hashedTokens[i]
-		dao := &model.AiApi{}
-		dao, err := dao.NewAiApiModel(hash)
+		dao, err := model.NewAiApiModel(hash)
 		if err != nil {
 			return err
 		}

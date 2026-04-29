@@ -39,7 +39,7 @@ func (modelObj *AiApi) ToDomainSlice(modelObjs []AiApi, tokensHashMap map[string
 	return result, nil
 }
 
-func (modelObj *AiApi) NewAiApiModel(hash string) (*AiApi, error) {
+func NewAiApiModel(hash string) (*AiApi, error) {
 	if hash == "" {
 		return nil, errors.New("hash must not be empty")
 	}
