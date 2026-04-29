@@ -10,7 +10,7 @@ import (
 	"backend/src/internal/async/status"
 	"backend/src/internal/db/abstract"
 
-	worker_repositories "backend/src/internal/async/worker/repository"
+	worker_config "backend/src/internal/async/worker/config"
 	repository "backend/src/internal/repository/impl"
 )
 
@@ -21,7 +21,7 @@ type Dispatcher struct {
 	requestsRepo repository.AsyncRequestRepository
 
 	//workerFactory *worker.WorkerFactory
-	workerRepositories worker_repositories.WorkerRepositories
+	workerConfig worker_config.WorkerConfig
 
 	sleepTime          time.Duration
 	maxAttempts        int
@@ -31,7 +31,7 @@ type Dispatcher struct {
 func NewDispatcher(
 	conn abstract.IDBConnection,
 	requestsRepo repository.AsyncRequestRepository,
-	workerRepositories worker_repositories.WorkerRepositories,
+	workerConfig worker_config.WorkerConfig,
 	sleepTime time.Duration,
 	maxAttempts int,
 	maxWorkersCount int,
@@ -42,7 +42,7 @@ func NewDispatcher(
 		sem:                sem,
 		conn:               conn,
 		requestsRepo:       requestsRepo,
-		workerRepositories: workerRepositories,
+		workerConfig:       workerConfig,
 		sleepTime:          sleepTime,
 		requestAttemptsMap: request_map.NewRequestAttemptsMap(),
 		maxAttempts:        maxAttempts,

@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,21 +17,30 @@ type Config struct {
 
 	MaxWorkersCount       int
 	DispatcherMaxAttempts int
+	DispatcherTimeSleep   time.Duration
 
-	DispatcherTimeSleep time.Duration
+	AiApiKeys     []string
+	AiModel       string
+	AiBaseUrl     string
+	AIReportYears int
 }
 
 func Load() *Config {
 	cfg := &Config{
-		DBUser:                "postgres",
-		DBPassword:            "",
-		DBNAME:                "postgres",
-		DBHost:                "localhost",
-		DBPort:                5432,
-		ServerPort:            8080,
+		DBUser:     "postgres",
+		DBPassword: "",
+		DBNAME:     "postgres",
+		DBHost:     "localhost",
+		DBPort:     5432,
+		ServerPort: 8080,
+
 		MaxWorkersCount:       3,
 		DispatcherMaxAttempts: 3,
 		DispatcherTimeSleep:   5 * time.Second,
+
+		AIReportYears: 5,
+		AiModel:       "openrouter/free",
+		AiBaseUrl:     "https://openrouter.ai/api/v1",
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
@@ -76,6 +86,24 @@ func Load() *Config {
 	if value := os.Getenv("DISPATCHER_TIME_SLEEP_SECONDS"); value != "" {
 		if seconds, err := strconv.Atoi(value); err == nil {
 			cfg.DispatcherTimeSleep = time.Duration(seconds)
+		}
+	}
+
+	if value := os.Getenv("OPENROUTER_BASE_URL"); value != "" {
+		cfg.AiBaseUrl = value
+	}
+
+	if value := os.Getenv("OPENROUTER_API_KEYS"); value != "" {
+		cfg.AiApiKeys = strings.Split(value, ",")
+	}
+
+	if value := os.Getenv("OPENROUTER_MODEL"); value != "" {
+		cfg.AiModel = value
+	}
+
+	if value := os.Getenv("AI_REPORT_YEARS"); value != "" {
+		if years, err := strconv.Atoi(value); err == nil {
+			cfg.AIReportYears = years
 		}
 	}
 
