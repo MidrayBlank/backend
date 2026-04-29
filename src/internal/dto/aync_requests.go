@@ -24,8 +24,6 @@ type RequestStatusResponse struct {
 }
 
 type ReportResponse struct {
-	Code   int             `json:"code"`
-	Name   string          `json:"name"`
 	Report AIReportContent `json:"report"`
 }
 

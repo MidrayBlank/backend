@@ -1,6 +1,6 @@
 package domain
 
 type AiReport struct {
-	code   int
-	report string
+	Code   int
+	Report string
 }
