@@ -39,6 +39,8 @@ func Load() *Config {
 		DispatcherTimeSleep:   5 * time.Second,
 
 		AIReportYears: 5,
+		AiModel:       "openrouter/free",
+		AiBaseUrl:     "https://openrouter.ai/api/v1",
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
@@ -91,7 +93,7 @@ func Load() *Config {
 		cfg.AiBaseUrl = value
 	}
 
-	if value := os.Getenv("OPENROUTER_API_KEY"); value != "" {
+	if value := os.Getenv("OPENROUTER_API_KEYS"); value != "" {
 		cfg.AiApiKeys = strings.Split(value, ",")
 	}
 
