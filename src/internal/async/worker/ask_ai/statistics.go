@@ -21,7 +21,7 @@ func prepareStatistics(
 	repositories repository.WorkerRepositories,
 	code int,
 ) ([]*domain.Rosstat, []*domain.RosstatByAge, error) {
-	rosstat, err := repositories.RosstatRepository.GetRosstatByCodeForLastFiveYears(conn, code)
+	rosstat, err := repositories.RosstatRepository.GetRosstatByCodeForLastYears(conn, code, years)
 	if err != nil {
 		return nil, nil, err
 	}

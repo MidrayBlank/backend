@@ -18,9 +18,10 @@ type Config struct {
 	DispatcherMaxAttempts int
 	DispatcherTimeSleep   time.Duration
 
-	AiApiKey  string
-	AiModel   string
-	AiBaseUrl string
+	AiApiKey      string
+	AiModel       string
+	AiBaseUrl     string
+	AIReportYears int
 }
 
 func Load() *Config {
@@ -35,6 +36,8 @@ func Load() *Config {
 		MaxWorkersCount:       3,
 		DispatcherMaxAttempts: 3,
 		DispatcherTimeSleep:   5 * time.Second,
+
+		AIReportYears: 5,
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
@@ -93,6 +96,12 @@ func Load() *Config {
 
 	if value := os.Getenv("OPENROUTER_MODEL"); value != "" {
 		cfg.AiModel = value
+	}
+
+	if value := os.Getenv("AI_REPORT_YEARS"); value != "" {
+		if years, err := strconv.Atoi(value); err == nil {
+			cfg.AIReportYears = years
+		}
 	}
 
 	return cfg
