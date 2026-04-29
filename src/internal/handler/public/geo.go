@@ -8,23 +8,19 @@ import (
 	"sort"
 )
 
-func GetGeoHandler(ctx context.HandlerContext, geoService service.IGeoService) (dto.GeoResponse, error) {
+func GetGeoHandler(ctx context.HandlerContext, geoService service.IGeoService) ([]dto.FederalSubject, error) {
 	geoList, err := geoService.GetGeoAll()
 	if err != nil {
-		return dto.GeoResponse{}, err
+		return nil, err
 	}
 
 	return buildGeoResponse(geoList)
 }
 
-func buildGeoResponse(geoList []domain.Geo) (dto.GeoResponse, error) {
+func buildGeoResponse(geoList []domain.Geo) ([]dto.FederalSubject, error) {
 	federalSubjects, childMap := groupGeoByParent(geoList)
 
-	return dto.GeoResponse{
-		Name:            "Российская Федерация",
-		Code:            0,
-		FederalSubjects: buildFederalSubjects(federalSubjects, childMap),
-	}, nil
+	return buildFederalSubjects(federalSubjects, childMap), nil
 }
 
 func groupGeoByParent(geoList []domain.Geo) ([]domain.Geo, map[int][]domain.Geo) {
@@ -32,7 +28,11 @@ func groupGeoByParent(geoList []domain.Geo) ([]domain.Geo, map[int][]domain.Geo)
 	childMap := make(map[int][]domain.Geo)
 
 	for _, geo := range geoList {
-		if geo.ParentCode == nil {
+		if geo.Code == 0 {
+			continue
+		}
+
+		if geo.ParentCode == nil || *geo.ParentCode == 0 {
 			federalSubjects = append(federalSubjects, geo)
 		} else {
 			childMap[*geo.ParentCode] = append(childMap[*geo.ParentCode], geo)

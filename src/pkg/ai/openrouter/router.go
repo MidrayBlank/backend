@@ -12,7 +12,6 @@ type AIOpenRouter struct {
 	model  string
 }
 
-// NewAIRouter создает объект AIRouter, создавая сначала объект OpenRouterClient
 func NewAIOpenRouter(apiKey, model, baseURL string) *AIOpenRouter {
 	return &AIOpenRouter{
 		client: NewOpenRouterClient(apiKey, baseURL),
@@ -29,9 +28,7 @@ func (r *AIOpenRouter) UseApiKey(apiKey string) error {
 	return nil
 }
 
-// SendRequest создает запрос из полученной строки, затем обращается к OpenRouterClient для обработки и получения результата
 func (r *AIOpenRouter) SendRequest(requstData string) (string, error) {
-	// Создаем стуктуру запросов к LLM
 	message := []Message{
 		{
 			Role:    "user",
@@ -39,10 +36,8 @@ func (r *AIOpenRouter) SendRequest(requstData string) (string, error) {
 		},
 	}
 
-	// Создаем обращение к OpenRouter и получаем ответ
 	response, err := r.client.ChatCompletion(r.model, message)
 	if err != nil {
-		// Проверка на timeout у OpenRouterClient
 		if os.IsTimeout(err) {
 			return "", fmt.Errorf("timeout, LLM не ответила за предоставленное ей время: %w", err)
 		}

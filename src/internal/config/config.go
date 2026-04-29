@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"time"
 )
 
 type Config struct {
@@ -12,16 +13,24 @@ type Config struct {
 	DBHost     string
 	DBPort     int
 	ServerPort int
+
+	MaxWorkersCount       int
+	DispatcherMaxAttempts int
+
+	DispatcherTimeSleep time.Duration
 }
 
 func Load() *Config {
 	cfg := &Config{
-		DBUser:     "postgres",
-		DBPassword: "",
-		DBNAME:     "postgres",
-		DBHost:     "localhost",
-		DBPort:     5432,
-		ServerPort: 8080,
+		DBUser:                "postgres",
+		DBPassword:            "",
+		DBNAME:                "postgres",
+		DBHost:                "localhost",
+		DBPort:                5432,
+		ServerPort:            8080,
+		MaxWorkersCount:       3,
+		DispatcherMaxAttempts: 3,
+		DispatcherTimeSleep:   5 * time.Second,
 	}
 
 	if value := os.Getenv("DATABASE_USER"); value != "" {
@@ -49,6 +58,24 @@ func Load() *Config {
 	if value := os.Getenv("SERVER_PORT"); value != "" {
 		if port, err := strconv.Atoi(value); err == nil {
 			cfg.ServerPort = port
+		}
+	}
+
+	if value := os.Getenv("MAX_WORKERS_COUNT"); value != "" {
+		if maxWorkersCount, err := strconv.Atoi(value); err == nil {
+			cfg.MaxWorkersCount = maxWorkersCount
+		}
+	}
+
+	if value := os.Getenv("DISPATCHER_MAX_ATTEMPTS_COUNT"); value != "" {
+		if maxAttemptsCount, err := strconv.Atoi(value); err == nil {
+			cfg.DispatcherMaxAttempts = maxAttemptsCount
+		}
+	}
+
+	if value := os.Getenv("DISPATCHER_TIME_SLEEP_SECONDS"); value != "" {
+		if seconds, err := strconv.Atoi(value); err == nil {
+			cfg.DispatcherTimeSleep = time.Duration(seconds)
 		}
 	}
 

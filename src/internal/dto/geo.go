@@ -1,8 +1,6 @@
 package dto
 
 type GeoResponse struct {
-	Name            string           `json:"name"`
-	Code            int              `json:"code"`
 	FederalSubjects []FederalSubject `json:"federal_subjects"`
 }
 
