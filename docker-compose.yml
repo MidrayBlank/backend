@@ -26,8 +26,8 @@ services:
     container_name: backend
     build:
       context: .
-    expose:
-      - '80'
+    ports:
+      - "8080:80"
     restart: always
     environment:
       - DATABASE_USER=${DATABASE_USER}
