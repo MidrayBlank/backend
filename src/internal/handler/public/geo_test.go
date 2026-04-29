@@ -65,14 +65,14 @@ func TestGetGeoHandler(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(response.FederalSubjects) != 2 {
-		t.Fatalf("expected 2 federal subjects, got %d", len(response.FederalSubjects))
+	if len(response) != 2 {
+		t.Fatalf("expected 2 federal subjects, got %d", len(response))
 	}
 
 	var sverdlovskRegion *dto.FederalSubject
-	for i := range response.FederalSubjects {
-		if response.FederalSubjects[i].Code == 55000 {
-			sverdlovskRegion = &response.FederalSubjects[i]
+	for i := range response {
+		if response[i].Code == 55000 {
+			sverdlovskRegion = &response[i]
 			break
 		}
 	}

@@ -8,21 +8,19 @@ import (
 	"sort"
 )
 
-func GetGeoHandler(ctx context.HandlerContext, geoService service.IGeoService) (dto.GeoResponse, error) {
+func GetGeoHandler(ctx context.HandlerContext, geoService service.IGeoService) ([]dto.FederalSubject, error) {
 	geoList, err := geoService.GetGeoAll()
 	if err != nil {
-		return dto.GeoResponse{}, err
+		return nil, err
 	}
 
 	return buildGeoResponse(geoList)
 }
 
-func buildGeoResponse(geoList []domain.Geo) (dto.GeoResponse, error) {
+func buildGeoResponse(geoList []domain.Geo) ([]dto.FederalSubject, error) {
 	federalSubjects, childMap := groupGeoByParent(geoList)
 
-	return dto.GeoResponse{
-		FederalSubjects: buildFederalSubjects(federalSubjects, childMap),
-	}, nil
+	return buildFederalSubjects(federalSubjects, childMap), nil
 }
 
 func groupGeoByParent(geoList []domain.Geo) ([]domain.Geo, map[int][]domain.Geo) {
