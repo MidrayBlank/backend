@@ -13,6 +13,9 @@ func (modelObj *AiReport) ToDomain() (*domain.AiReport, error) {
 	return ToDomain[AiReport, domain.AiReport](modelObj)
 }
 
-func (modelObj *AiReport) ToModel(domainObj *domain.AiReport) (*AiReport, error) {
-	return ToModel[AiReport, domain.AiReport](domainObj)
+func ToReportModel(code int, report string) *AiReport {
+	return &AiReport{
+		Code:   code,
+		Report: report,
+	}
 }

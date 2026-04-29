@@ -6,7 +6,6 @@ import (
 )
 
 type IAIReportRepository interface {
-	Put(conn abstract.IDBConnection, code int, report string) error
-	Get(conn abstract.IDBConnection, code int) (*domain.AiReport, error)
-	Delete(conn abstract.IDBConnection, code int) error
+	Upsert(conn abstract.IDBConnection, code int, report string) error
+	GetReportByCode(conn abstract.IDBConnection, code int) (*domain.AiReport, error)
 }

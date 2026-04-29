@@ -39,7 +39,7 @@ func AskAIByCodeWorker(
 	cfg := config.Load()
 	aiRouterClient := ai.NewAIOpenRouter(cfg.AiApiKey, cfg.AiModel, cfg.AiBaseUrl)
 
-	responseText, err := aiRouterClient.SendRequest(prompt)
+	response, err := aiRouterClient.SendRequest(prompt)
 	if err != nil {
 		ch <- status.CompletionStatus{RequestId: requestId, Err: err}
 		return
