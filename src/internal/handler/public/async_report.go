@@ -1,6 +1,7 @@
 package public
 
 import (
+	request_type "backend/src/internal/async/request"
 	context "backend/src/internal/context/abstract"
 	"backend/src/internal/domain"
 	"backend/src/internal/dto"
@@ -17,6 +18,11 @@ func GetReportAsyncHandler(ctx context.HandlerContext,
 
 	code, err := strconv.Atoi(codeStr)
 	if err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return dto.ReportResponse{}
+	}
+
+	if code <= 0 {
 		ctx.Status(http.StatusBadRequest)
 		return dto.ReportResponse{}
 	}
@@ -46,11 +52,26 @@ func PutReportAsyncHandler(ctx context.HandlerContext,
 	aiReportAsyncService service.IAiReportAsyncService,
 ) dto.CreateReportResponse {
 	var request dto.CreateReportRequest
-	if err := ctx.BindJSON(&req); err != nil {
+
+	if err := ctx.BindJSON(&request); err != nil {
 		ctx.Status(http.StatusBadRequest)
-		return dto.CreateReportResponse{
-			Hash:    "",
-			Message: "invalid request body",
-		}
+		return dto.CreateReportResponse{}
+	}
+
+	if request.Code <= 0 {
+		ctx.Status(http.StatusBadRequest)
+		return dto.CreateReportResponse{}
+	}
+
+	hash, err := aiReportAsyncService.CreateReportRequest(request.Code, request_type.AIREPORT)
+	if err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return dto.CreateReportResponse{}
+	}
+
+	ctx.Status(204)
+	return dto.CreateReportResponse{
+		Hash:    hash,
+		Message: "Запрос принят в работу",
 	}
 }

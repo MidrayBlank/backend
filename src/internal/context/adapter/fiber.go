@@ -19,6 +19,6 @@ func (fiberAdapter *FiberCtxAdapter) Status(status int) abstract.HandlerContext 
 	return fiberAdapter
 }
 
-func (fiberAdapter *FiberCtxAdapter) BindJSON(data interface{}) error {
+func (fiberAdapter *FiberCtxAdapter) BindJSON(data any) error {
 	return fiberAdapter.Ctx.Bind().JSON(data)
 }
