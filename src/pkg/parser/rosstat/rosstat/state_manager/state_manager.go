@@ -25,7 +25,9 @@ func (manager *StateManager[T]) ChangeState(state int) {
 }
 
 func (manager *StateManager[T]) DoOnStateState(row []string) {
-	manager.stateFuncMap[manager.state](row, manager)
+	if fn, exists := manager.stateFuncMap[manager.state]; exists {
+		fn(row, manager)
+	}
 }
 
 func (manager *StateManager[T]) PutParsed(parsed *T) {

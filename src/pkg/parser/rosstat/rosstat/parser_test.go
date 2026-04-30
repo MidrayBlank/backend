@@ -54,3 +54,45 @@ func TestRosstatParserPopulation(t *testing.T) {
 		}
 	}
 }
+
+func TestRosstatParserBirth(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping full parser test in short mode")
+	}
+
+	storage := storage.NewStorage()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	code := subparser.NewCodeSubparser()
+	birth := subparser.NewBirthSubparser()
+
+	err := code.Parse(ctx, storage)
+	if err != nil {
+		t.Errorf("Error occurred in code parser: %s", err.Error())
+	}
+
+	err = birth.Parse(ctx, storage)
+	if err != nil {
+		t.Errorf("Error occurred in birth parser: %s", err.Error())
+	}
+
+	config := config.NewConfig()
+	subjectCodes := config.SubjectCodes
+
+	result := storage.Result()
+
+	subjectCodesBool := make([]bool, 100)
+	for _, item := range result {
+		if item.ParentCode < 100 {
+			subjectCodesBool[item.ParentCode] = true
+		}
+	}
+
+	for _, subjectCode := range subjectCodes {
+		if !subjectCodesBool[subjectCode] {
+			t.Log("SubjectCode ", subjectCode, " not parsed")
+		}
+	}
+}
