@@ -1,6 +1,6 @@
 package report
 
-import "backend/src/pkg/report/key_demographic_indicators/domain"
+import "backend/src/pkg/report/sync/key_demographic_indicators/domain"
 
 type DemographicReportCompiler struct{}
 
@@ -25,11 +25,11 @@ func (c *DemographicReportCompiler) Compile(data []*domain.DemographicParams) []
 			})
 			continue
 		}
-		population := float32(dat.PopulationAmount)
-		birthRate := float32(dat.BirthAmount) / population * 1000
-		deathRate := float32(dat.DeathAmount) / population * 1000
-		naturalRate := float32(dat.BirthAmount-dat.DeathAmount) / population * 1000
-		migrationRate := float32(dat.ArrivalAmount-dat.DepartureAmount) / population * 1000
+		population := float64(dat.PopulationAmount)
+		birthRate := float64(dat.BirthAmount) / population * 1000
+		deathRate := float64(dat.DeathAmount) / population * 1000
+		naturalRate := float64(dat.BirthAmount-dat.DeathAmount) / population * 1000
+		migrationRate := float64(dat.ArrivalAmount-dat.DepartureAmount) / population * 1000
 		report = append(report, &domain.DemographicReport{
 			OKTMO:         dat.OKTMO,
 			Year:          dat.Year,

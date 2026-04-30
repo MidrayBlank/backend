@@ -1,6 +1,6 @@
 package report
 
-import "backend/src/pkg/report/population_density/domain"
+import "backend/src/pkg/report/sync/population_density/domain"
 
 type PopulationDensityReportCompiler struct{}
 
@@ -14,9 +14,9 @@ func (c *PopulationDensityReportCompiler) Compile(data []*domain.PopulationDensi
 	}
 	report := make([]*domain.PopulationDensityReport, 0, len(data))
 	for _, dat := range data {
-		var density float32
+		var density float64
 		if dat.LandArea > 0 {
-			density = float32(dat.PopulationAmount) / dat.LandArea
+			density = float64(dat.PopulationAmount) / dat.LandArea
 		}
 		report = append(report, &domain.PopulationDensityReport{
 			OKTMO:   dat.OKTMO,

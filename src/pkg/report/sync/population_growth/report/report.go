@@ -1,6 +1,6 @@
 package report
 
-import "backend/src/pkg/report/population_growth/domain"
+import "backend/src/pkg/report/sync/population_growth/domain"
 
 type PopulationGrowthReportCompiler struct{}
 
@@ -17,7 +17,7 @@ func (c *PopulationGrowthReportCompiler) Compile(data []*domain.PopulationGrowth
 		if dat.PopulationAmountFrom == 0 {
 			continue
 		}
-		growthPct := float32(dat.PopulationAmountTo-dat.PopulationAmountFrom) / float32(dat.PopulationAmountFrom) * 100
+		growthPct := float64(dat.PopulationAmountTo-dat.PopulationAmountFrom) / float64(dat.PopulationAmountFrom) * 100
 		report = append(report, &domain.PopulationGrowthReport{
 			OKTMO:               dat.OKTMO,
 			YearFrom:            dat.YearFrom,

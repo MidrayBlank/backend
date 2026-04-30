@@ -13,8 +13,8 @@ type DemographicParams struct {
 type DemographicReport struct {
 	OKTMO         int
 	Year          int
-	BirthRate     float32
-	DeathRate     float32
-	NaturalRate   float32
-	MigrationRate float32
+	BirthRate     float64
+	DeathRate     float64
+	NaturalRate   float64
+	MigrationRate float64
 }

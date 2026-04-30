@@ -12,5 +12,5 @@ type PopulationGrowthReport struct {
 	OKTMO               int
 	YearFrom            int
 	YearTo              int
-	PopulationGrowthPct float32
+	PopulationGrowthPct float64
 }
