@@ -57,5 +57,9 @@ func Run() {
 	app.Get("/openapi.yaml", api.OpenapiYamlHandler)
 	app.Get("/api/*", api.ApiHandler())
 
+	app.Get("/api/v1/report/:code", middleware.Adapt(public.GetReportAsyncHandler, serviceProvider))
+	app.Get("/api/v1/report/:code/request/:hash", middleware.Adapt(public.GetRequestStatusHandler, serviceProvider))
+	app.Post("/api/v1/report", middleware.Adapt(public.PostReportAsyncHandler, serviceProvider))
+
 	log.Fatal(app.Listen(":80"))
 }

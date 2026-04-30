@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
     branches: [dev]
-    types: [opened, reopened, closed]
+    types: [opened, reopened]
 
 permissions:
   contents: read
@@ -31,6 +31,18 @@ jobs:
 
       - name: Build and run services
         run: docker compose up db backend nginx -d --build --wait --wait-timeout 60
+
+      - name: Install goose
+        run: docker exec backend go install github.com/pressly/goose/v3/cmd/goose@latest
+
+      - name: Migration db
+        run: docker exec backend sh ./src/scripts/migrations.test.sh --up
+
+      - name: Check migrations
+        run: docker exec backend sh ./src/scripts/migrations.test.sh --status
+
+      - name: Testing
+        run: docker exec backend go test -v -short ./src/...
 
       - name: Shutdown Docker Compose
         if: always()
