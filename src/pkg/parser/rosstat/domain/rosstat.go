@@ -8,10 +8,11 @@ type RosstatAgeParsed struct {
 
 type RosstatParsed struct {
 	Code                int
-	ParentCode          int
-	Name                string
+	SubjectCode         int
 	Year                int
 	Population          *int
+	RuralUsed           bool
+	UrbanUsed           bool
 	Birth               *int
 	Death               *int
 	Arrival             *int
