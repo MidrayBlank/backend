@@ -2,6 +2,7 @@ package abstract
 
 import (
 	"backend/src/internal/db/abstract"
+	"backend/src/internal/domain"
 	"backend/src/internal/model"
 	"context"
 )
@@ -11,4 +12,8 @@ type IAsyncRequestRepository interface {
 	SetStatusById(ctx context.Context, conn abstract.IDBConnection, id int, status int) error
 	SetStatusAndIncrementById(ctx context.Context, conn abstract.IDBConnection, id int, status int) error
 	CloseTimeoutRequests(ctx context.Context, conn abstract.IDBConnection) error
+
+	CreateRequest(conn abstract.IDBConnection, requst *model.AsyncRequest) error
+	GetSuccessRequestByCode(conn abstract.IDBConnection, code int) (*model.AsyncRequest, error)
+	GetRequestByHash(conn abstract.IDBConnection, hash string) (*domain.AsyncRequest, error)
 }

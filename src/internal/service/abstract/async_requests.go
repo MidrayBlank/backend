@@ -1,6 +1,8 @@
 package abstract
 
-import "backend/src/internal/domain"
+import (
+	"backend/src/internal/domain"
+)
 
 type IAiReportAsyncService interface {
 	GetReportByCode(code int) (*domain.AsyncRequest, error)

@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS async_requests (
     status       INTEGER,
     request_type INTEGER,
     attempts     INTEGER,
-    request_data TEXT,
     result       TEXT,
     error        TEXT,
     deadline_at  TIMESTAMP,
