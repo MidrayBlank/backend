@@ -2,16 +2,15 @@ package rosstat
 
 import (
 	"context"
-	"fmt"
 
 	"backend/src/pkg/parser/rosstat/domain"
 	"backend/src/pkg/parser/rosstat/rosstat/storage"
 	"backend/src/pkg/parser/rosstat/rosstat/subparser"
-
-	"golang.org/x/sync/errgroup"
 )
 
 type RosstatParser struct {
+	code subparser.CodeSubparser
+
 	population subparser.PopulationSubparser
 	// birth               subparser.BirthSubparser
 	// death               subparser.DeathSubparser
@@ -34,14 +33,16 @@ func NewRosstatParser() *RosstatParser {
 }
 
 func (p *RosstatParser) Parse(ctx context.Context) (domain.RosstatParsedSlice, error) {
-	g, ctx := errgroup.WithContext(ctx)
+	err := p.code.Parse(ctx, p.storage)
 
-	g.Go(func() error {
-		return p.population.Parse(ctx, p.storage)
-	})
+	if err != nil {
+		return nil, err
+	}
 
-	if err := g.Wait(); err != nil {
-		return nil, fmt.Errorf("RosstatParser: async parsing failed: %w", err)
+	err = p.population.Parse(ctx, p.storage)
+
+	if err != nil {
+		return nil, err
 	}
 
 	return p.storage.Result(), nil

@@ -11,27 +11,22 @@ import (
 )
 
 type BaseCSVExtractor[T any] struct {
-	file *os.File
 }
 
-func (r *BaseCSVExtractor[T]) getReader(filePath string) (*csv.Reader, error) {
+func (r *BaseCSVExtractor[T]) getReader(filePath string) (*csv.Reader, *os.File, error) {
 	var err error
-	r.file, err = os.Open(filePath)
+	file, err := os.Open(filePath)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	reader := csv.NewReader(r.file)
+	reader := csv.NewReader(file)
 	reader.FieldsPerRecord = -1
 	reader.Comma = ';'
 	reader.LazyQuotes = true
 
-	return reader, nil
-}
-
-func (r *BaseCSVExtractor[T]) closeReader() {
-	r.file.Close()
+	return reader, file, nil
 }
 
 func (r *BaseCSVExtractor[T]) ExtractRows(
@@ -39,13 +34,13 @@ func (r *BaseCSVExtractor[T]) ExtractRows(
 	filePath string,
 	manager *state_manager.StateManager[T],
 ) error {
-	reader, err := r.getReader(filePath)
+	reader, file, err := r.getReader(filePath)
 
 	if err != nil {
 		return err
 	}
 
-	defer r.closeReader()
+	defer file.Close()
 
 	for {
 		if err := ctx.Err(); err != nil {
