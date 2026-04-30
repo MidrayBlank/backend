@@ -4,7 +4,7 @@ info:
   description: |
     С помощью этого API можно выгрузить данные Росстата
     и прочие рассчитанные данные для дашбордов,
-    запросить прогноз по численнсоти населения
+    запросить прогноз по численности населения
     и AI справку.
   version: 1.0.0
 paths:
@@ -25,6 +25,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FederalSubject'
+              example:
+                - name: "Алтайский край"
+                  code: 1
+                  upper_municipalities: []
+                - name: "Краснодарский край"
+                  code: 3
+                  upper_municipalities: []
 
   /api/v1/rosstat:
     get:
@@ -40,7 +47,7 @@ paths:
               type: string
               enum: [year, population, birth, death, arrival, departure, age,
                     male, female, land_area, avg_salary,
-                    medicial_facilities, schools, housing_commissioned] 
+                    medical_facilities, schools, housing_commissioned] 
           style: form
           explode: true
           example: ["population", "birth", "death"]
@@ -56,7 +63,7 @@ paths:
               type: integer
           style: form
           explode: true
-          example: [1, 2, 3]
+          example: [1, 3, 4]
       responses:
         '200':
           description: OK
@@ -64,6 +71,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RosstatResponse'
+              example:
+                - code: 1
+                  by_year:
+                    - year: 2020
+                      population: 2300000
+                      birth: 20000
+                      death: 25000
+                    - year: 2021
+                      population: 2310000
+                      birth: 19000
+                      death: 24000
+                - code: 2
+                  by_year:
+                    - year: 2020
+                      population: 146000000
+                      birth: 1400000
+                      death: 1800000
         '400':
           description: |
             Отсутствует обязательный параметр
@@ -72,6 +96,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "field 'fields' is required"
 
 components:
   schemas:
@@ -81,6 +107,8 @@ components:
         error:
           type: string
           description: Описание ошибки
+      example:
+        error: "field 'fields' is required"
 
     LowerMunicipality:
       type: object
@@ -95,6 +123,9 @@ components:
       required:
         - name
         - code
+      example:
+        name: "Центральный район"
+        code: 1000
 
     UpperMunicipality:
       type: object
@@ -115,6 +146,14 @@ components:
         - name
         - code
         - lower_municipalities
+      example:
+        name: "г. Барнаул"
+        code: 100
+        lower_municipalities:
+          - name: "Центральный район"
+            code: 1000
+          - name: "Ленинский район"
+            code: 1001
 
     FederalSubject:
       type: object
@@ -135,6 +174,13 @@ components:
         - name
         - code
         - upper_municipalities
+      example:
+        name: "Алтайский край"
+        code: 1
+        upper_municipalities:
+          - name: "г. Барнаул"
+            code: 100
+            lower_municipalities: []
         
     RosstatByAge:
       type: object
@@ -152,6 +198,10 @@ components:
         - age
         - male
         - female
+      example:
+        age: 25
+        male: 50000
+        female: 48000
 
     RosstatByYear:
       type: object
@@ -162,54 +212,74 @@ components:
         population:
           type: integer
           description: Численность населения за указанный год.
+          nullable: true
         birth:
           type: integer
           description: Численность рожденных за указанный год.
+          nullable: true
         death:
           type: integer
           description: Численность умерших за указанный год.
+          nullable: true
         arrival:
           type: integer
           description: Численность прибывших за указанный год.
+          nullable: true
         departure:
           type: integer
           description: Численность выбывших за указанный год.
+          nullable: true
         male:
           type: integer
           description: Численность мужчин за указанный год.
+          nullable: true
         female:
           type: integer
           description: Численность женщин за указанный год.
+          nullable: true
         land_area:
           type: number
           format: float
           description: Земельная площадь субъекта РФ или муниципалитета за указанный год.
+          nullable: true
         avg_salary:
           type: number
           format: float
           description: |
             Средняя заработная плата по субъекту РФ или муниципалитету
             за указанный год.
-        medicial_facilities:
+          nullable: true
+        medical_facilities:
           type: integer
           description: |
             Число медицинских учреждений в субъекте РФ или муниципалитете
             за указанный год.
+          nullable: true
         schools:
           type: integer
           description: |
             Число школ в субъекте РФ или муниципалитете
             за указанный год.
+          nullable: true
         housing_commissioned:
           type: integer
           description: |
             Число введенных в эксплуатацию жилых объектов в субъекте РФ или муниципалитете
             за указанный год.
+          nullable: true
         by_age:
           type: array
           description: Численность мужчин и женщин по возрасту за год.
+          nullable: true
           items:
             $ref: '#/components/schemas/RosstatByAge'
+      example:
+        year: 2020
+        population: 2300000
+        birth: 20000
+        death: 25000
+        arrival: 15000
+        departure: 12000
 
     Rosstat:
       type: object
@@ -228,8 +298,32 @@ components:
       required:
         - code
         - by_year
+      example:
+        code: 1
+        by_year:
+          - year: 2020
+            population: 2300000
+            birth: 20000
+            death: 25000
+          - year: 2021
+            population: 2310000
+            birth: 19000
+            death: 24000
 
     RosstatResponse:
       type: array
       items:
         $ref: '#/components/schemas/Rosstat'
+      example:
+        - code: 1
+          by_year:
+            - year: 2020
+              population: 2300000
+              birth: 20000
+              death: 25000
+        - code: 0
+          by_year:
+            - year: 2020
+              population: 146000000
+              birth: 1400000
+              death: 1800000
