@@ -1,1 +1,0 @@
-package rosstat_parse_test

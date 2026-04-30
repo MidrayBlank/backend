@@ -1,4 +1,4 @@
-package async_backend
+package main
 
 import (
 	"backend/src/internal/async/dispatcher"
