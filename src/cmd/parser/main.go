@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"backend/src/internal/config"
 	"backend/src/internal/db/postgres"
@@ -30,35 +32,101 @@ func main() {
 		panic(err)
 	}
 
-	higherGEOs := make([]*domain.Geo, len(parsedSlice))
-	lowerGEOs := make([]*domain.Geo, len(parsedSlice))
+	fmt.Printf("Parsed count: %d\n", len(parsedSlice))
+
+	GEOs := make([]*domain.Geo, 0, len(parsedSlice))
 	rosstats := make([]*domain.Rosstat, len(parsedSlice))
 
+	codeMap := make(map[int]bool)
+
+	fmt.Printf("Grouping...\n")
+
 	for index, parsed := range parsedSlice {
-		if parsed.ParentCode < 100 {
-			higherGEOs = append(higherGEOs, &domain.Geo{
+		if _, exists := codeMap[parsed.Code]; !exists {
+			codeMap[parsed.Code] = true
+			GEOs = append(GEOs, &domain.Geo{
 				Code:       parsed.Code,
 				ParentCode: &parsed.ParentCode,
 				Name:       parsed.Name,
 				Level:      2,
 			})
-		} else {
-			lowerGEOs = append(lowerGEOs, &domain.Geo{
-				Code:       parsed.Code,
-				ParentCode: &parsed.ParentCode,
-				Name:       parsed.Name,
-				Level:      3,
-			})
 		}
 
 		rosstats[index] = &domain.Rosstat{
-			Code: parsed.Code,
-			Year: parsed.Year,
+			Code:             parsed.Code,
+			Year:             parsed.Year,
+			PopulationAmount: parsed.Population,
 		}
 	}
 
-	geoRepo.UpsertBatch(conn, higherGEOs)
-	geoRepo.UpsertBatch(conn, lowerGEOs)
+	fmt.Printf("Grouped\n")
 
-	rosstatRepo.UpsertBatch(conn, rosstats)
+	batchSize := 50
+	startIndex := 0
+	endIndex := batchSize
+
+	fmt.Printf("Upsert batch geo higher...\n")
+	for {
+		if endIndex >= len(GEOs) {
+			endIndex = len(GEOs)
+		}
+		fmt.Printf("Upsert batch geo higher [%d:%d]...\n", startIndex, endIndex)
+		if err := geoRepo.UpsertBatch(conn, GEOs[startIndex:endIndex]); err != nil {
+			log.Printf("ERROR [higherGEOs]: %s\n", err.Error())
+			return
+		}
+
+		if endIndex >= len(GEOs) {
+			break
+		}
+
+		startIndex = endIndex
+		endIndex += batchSize
+
+		if endIndex >= len(GEOs) {
+			endIndex = len(GEOs)
+		}
+	}
+
+	startIndex = 0
+	endIndex = batchSize
+
+	fmt.Printf("Upsert batch rosstat...\n")
+	for {
+		if endIndex >= len(rosstats) {
+			endIndex = len(rosstats)
+		}
+		fmt.Printf("Upsert batch rosstat [%d:%d]...\n", startIndex, endIndex)
+		if err := rosstatRepo.UpsertBatch(conn, rosstats[startIndex:endIndex]); err != nil {
+			log.Printf("ERROR [lowerGEOs]: %s\n", err.Error())
+			return
+		}
+
+		if endIndex >= len(rosstats) {
+			break
+		}
+
+		startIndex = endIndex
+		endIndex += batchSize
+
+		if endIndex >= len(rosstats) {
+			endIndex = len(rosstats)
+		}
+	}
+}
+
+func getSubjectCode(code int) int {
+	extendedSubjectCode := code / 100000
+	subjectCode := code / 1000000
+
+	switch extendedSubjectCode {
+	case 118:
+		subjectCode = extendedSubjectCode
+	case 718:
+		subjectCode = extendedSubjectCode
+	case 719:
+		subjectCode = extendedSubjectCode
+	}
+
+	return subjectCode
 }

@@ -222,9 +222,9 @@ func (s *Storage) Result() []*domain.RosstatParsed {
 }
 
 func (s *Storage) getParentCode(code int) int {
-	if code%1000 != 0 {
-		return code / 1000 * 1000
-	}
+	// if code%1000 != 0 {
+	// 	return code / 1000 * 1000
+	// }
 
 	extendedSubjectCode := code / 100000
 	subjectCode := code / 1000000
