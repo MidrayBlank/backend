@@ -40,7 +40,7 @@ func (r *AsyncRequestRepository) SetStatusById(ctx context.Context, conn abstrac
 
 	return db.WithContext(ctx).
 		Model(&model.AsyncRequest{}).
-		Where("id = ?", id).
+		Where("status = ? AND id = ?", id).
 		Updates(map[string]interface{}{
 			"status":     status,
 			"updated_at": time.Now(),
@@ -76,4 +76,9 @@ func (r *AsyncRequestRepository) CloseTimeoutRequests(ctx context.Context, conn 
 				status.StatusFailed, status.StatusQueued),
 			"updated_at": time.Now(),
 		}).Error
+}
+
+func (r *AsyncRequestRepository) CreateRequest(ctx context.Context, conn abstract.IDBConnection) error {
+	db := conn.Get().(*gorm.DB)
+
 }
