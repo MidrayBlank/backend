@@ -48,7 +48,7 @@ func buildAsyncReportResponse(ctx context.HandlerContext, report *domain.AsyncRe
 	}
 }
 
-func PutReportAsyncHandler(ctx context.HandlerContext,
+func PostReportAsyncHandler(ctx context.HandlerContext,
 	aiReportAsyncService service.IAiReportAsyncService,
 ) dto.CreateReportResponse {
 	var request dto.CreateReportRequest
@@ -88,13 +88,15 @@ func PutReportAsyncHandler(ctx context.HandlerContext,
 func GetRequestStatusHandler(ctx context.HandlerContext,
 	aiReportAsyncService service.IAiReportAsyncService,
 ) dto.RequestStatusResponse {
+	codeStr := ctx.Get("code")
 	hash := ctx.Get("hash")
-	if hash == "" {
+
+	if codeStr == "" || hash == "" {
 		ctx.Status(http.StatusBadRequest)
 		return dto.RequestStatusResponse{
 			Hash:   "",
 			Status: 0,
-			Error:  "hash parameter is required",
+			Error:  "code and hash parameters are required",
 		}
 	}
 

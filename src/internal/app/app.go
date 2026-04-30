@@ -38,15 +38,15 @@ func Run() {
 
 	// CORS middleware
 	app.Use(func(c fiber.Ctx) error {
-			c.Set("Access-Control-Allow-Origin", "https://midray.ru")
-			c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			c.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization")
+		c.Set("Access-Control-Allow-Origin", "https://midray.ru")
+		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization")
 
-			if c.Method() == fiber.MethodOptions {
-					return c.SendStatus(fiber.StatusNoContent)
-			}
+		if c.Method() == fiber.MethodOptions {
+			return c.SendStatus(fiber.StatusNoContent)
+		}
 
-			return c.Next()
+		return c.Next()
 	})
 
 	app.Get("/ping", health.PingHandler)
@@ -56,6 +56,10 @@ func Run() {
 
 	app.Get("/openapi.yaml", api.OpenapiYamlHandler)
 	app.Get("/api/*", api.ApiHandler())
+
+	app.Get("/api/v1/report/:code", middleware.Adapt(public.GetReportAsyncHandler, serviceProvider))
+	app.Get("/api/v1/report/:code/request/:hash", middleware.Adapt(public.GetRequestStatusHandler, serviceProvider))
+	app.Post("/api/v1/report", middleware.Adapt(public.PostReportAsyncHandler, serviceProvider))
 
 	log.Fatal(app.Listen(":80"))
 }
