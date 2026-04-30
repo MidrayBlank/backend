@@ -34,8 +34,6 @@ func DownloadCSV(ctx context.Context, subjectCode int, indicator int, codes []in
 
 	bodyStr := params.buildRequestBodyStr()
 	attempts := 0
-	var resp *http.Response
-	var err error
 
 	for attempts < config.DownloadCSVMaxAttempts {
 		req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(bodyStr))
@@ -57,44 +55,48 @@ func DownloadCSV(ctx context.Context, subjectCode int, indicator int, codes []in
 			},
 		}
 
-		resp, err = client.Do(req)
-		if err == nil {
-			break
+		resp, err := client.Do(req)
+		if err != nil {
+			if resp != nil {
+				resp.Body.Close()
+			}
+			attempts++
+			time.Sleep(time.Duration(config.DownloadHTMLTimeSleepSeconds) * time.Second)
+			continue
 		}
-		attempts++
-		time.Sleep(time.Duration(config.DownloadCSVTimeSleepSeconds) * time.Second)
+
+		if err != nil {
+			return "", fmt.Errorf("error executing request: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("ERROR: unexpected status %d: code: %d\n", resp.StatusCode, subjectCode)
+			continue
+		}
+
+		rawBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("reading body: %w", err)
+		}
+
+		decoder := charmap.Windows1251.NewDecoder()
+		utf8Body, err := decoder.Bytes(rawBody)
+		if err != nil {
+			return "", fmt.Errorf("decoding Windows-1251: %w", err)
+		}
+
+		fileName := getCSVFileName(subjectCode, indicator)
+
+		if err := os.WriteFile(fileName, utf8Body, 0644); err != nil {
+			return "", fmt.Errorf("error writing file %s: %w", fileName, err)
+		}
+
+		resp.Body.Close()
+		log.Printf("Saved CSV to %s\n", fileName)
+		return fileName, nil
 	}
 
-	if err != nil {
-		return "", fmt.Errorf("error executing request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("unexpected status %d: code: %d, body: %s", resp.StatusCode, subjectCode, string(body))
-	}
-
-	rawBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("reading body: %w", err)
-	}
-
-	decoder := charmap.Windows1251.NewDecoder()
-	utf8Body, err := decoder.Bytes(rawBody)
-	if err != nil {
-		return "", fmt.Errorf("decoding Windows-1251: %w", err)
-	}
-
-	fileName := getCSVFileName(subjectCode, indicator)
-
-	if err := os.WriteFile(fileName, utf8Body, 0644); err != nil {
-		return "", fmt.Errorf("error writing file %s: %w", fileName, err)
-	}
-
-	log.Printf("Saved CSV to %s\n", fileName)
-	return fileName, nil
+	return "", fmt.Errorf("Failed CSV request by code %d\n", subjectCode)
 }
 
 func DownloadHTML(ctx context.Context, subjectCode int) (string, error) {
@@ -107,8 +109,6 @@ func DownloadHTML(ctx context.Context, subjectCode int) (string, error) {
 	body := url.Values{}
 	body.Set("pl", strconv.Itoa(config.GetPopulationIndicator(subjectCode)))
 	attempts := 0
-	var resp *http.Response
-	var err error
 
 	for attempts < config.DownloadHTMLMaxAttempts {
 		req, err := http.NewRequestWithContext(ctx, "POST", urlStr, strings.NewReader(body.Encode()))
@@ -126,44 +126,49 @@ func DownloadHTML(ctx context.Context, subjectCode int) (string, error) {
 			},
 		}
 
-		resp, err = client.Do(req)
-		if err == nil {
-			break
+		resp, err := client.Do(req)
+
+		if err != nil {
+			if resp != nil {
+				resp.Body.Close()
+			}
+			attempts++
+			time.Sleep(time.Duration(config.DownloadHTMLTimeSleepSeconds) * time.Second)
+			continue
 		}
-		attempts++
-		time.Sleep(time.Duration(config.DownloadHTMLTimeSleepSeconds) * time.Second)
+
+		if err != nil {
+			return "", fmt.Errorf("error executing request: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("ERROR: unexpected status %d: code: %d\n", resp.StatusCode, subjectCode)
+			continue
+		}
+
+		rawBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("reading body: %w", err)
+		}
+
+		decoder := charmap.Windows1251.NewDecoder()
+		utf8Body, err := decoder.Bytes(rawBody)
+		if err != nil {
+			return "", fmt.Errorf("decoding Windows-1251: %w", err)
+		}
+
+		fileName := getHTMLFileName(subjectCode)
+
+		if err := os.WriteFile(fileName, utf8Body, 0644); err != nil {
+			return "", fmt.Errorf("error writing file %s: %w", fileName, err)
+		}
+
+		resp.Body.Close()
+		log.Printf("Saved HTML to %s\n", fileName)
+		return fileName, nil
 	}
 
-	if err != nil {
-		return "", fmt.Errorf("error executing request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("unexpected status %d: code: %d, body:  %s", resp.StatusCode, subjectCode, string(body))
-	}
-
-	rawBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("reading body: %w", err)
-	}
-
-	decoder := charmap.Windows1251.NewDecoder()
-	utf8Body, err := decoder.Bytes(rawBody)
-	if err != nil {
-		return "", fmt.Errorf("decoding Windows-1251: %w", err)
-	}
-
-	fileName := getHTMLFileName(subjectCode)
-
-	if err := os.WriteFile(fileName, utf8Body, 0644); err != nil {
-		return "", fmt.Errorf("error writing file %s: %w", fileName, err)
-	}
-
-	log.Printf("Saved HTML to %s\n", fileName)
-	return fileName, nil
+	return "", fmt.Errorf("Failed HTML request by code %d\n", subjectCode)
 }
 
 func CleanupFile(path string) {
