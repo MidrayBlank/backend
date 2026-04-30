@@ -1,5 +1,5 @@
 package request
 
 const (
-	YDISKPARSE = 100
+	ROSSTAT_PARSE = 100
 )
