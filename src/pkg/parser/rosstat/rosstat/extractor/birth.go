@@ -3,6 +3,7 @@ package extractor
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"backend/src/pkg/parser/rosstat/rosstat/dao"
 	"backend/src/pkg/parser/rosstat/rosstat/state_manager"
@@ -41,15 +42,25 @@ func (ext *BirthExtractor) skip(row []string, manager *state_manager.StateManage
 func (ext *BirthExtractor) getYears(row []string, manager *state_manager.StateManager[dao.BirthExtracted]) {
 	ext.years = make([]int, len(row)-1)
 
-	for i := 1; i < len(ext.years); i++ {
-		ext.years[i], _ = strconv.Atoi(row[i])
+	for i := 1; i < len(row); i++ {
+		if row[i] == "" {
+			continue
+		}
+		year, err := strconv.Atoi(row[i])
+		if err == nil {
+			ext.years[i-1] = year
+		}
 	}
 
-	manager.ChangeState(GET_NAME_OR_POPULATION)
+	manager.ChangeState(GET_NAME_OR_BIRTH)
 }
 
 func (ext *BirthExtractor) getNameOrBirth(row []string, manager *state_manager.StateManager[dao.BirthExtracted]) {
-	if len(row) > 0 && row[0] == "Число родившихся (без мертворожденных), человек, значение показателя за год" {
+	if len(row) == 0 || row[0] == "" {
+		return
+	}
+
+	if strings.HasPrefix(row[0], "Муниципальный район") && len(row) > 1 && row[1] != "" {
 		ext.getBirth(row, manager)
 		return
 	}
@@ -67,9 +78,8 @@ func (ext *BirthExtractor) getBirth(row []string, manager *state_manager.StateMa
 		if row[i] == "" {
 			continue
 		}
-
 		birth, err := strconv.Atoi(row[i])
-		if err == nil {
+		if err == nil && birth > 0 {
 			birthDAOs = append(birthDAOs, &dao.BirthExtracted{
 				Code:  ext.code,
 				Year:  ext.years[i-1],
@@ -80,5 +90,6 @@ func (ext *BirthExtractor) getBirth(row []string, manager *state_manager.StateMa
 
 	if len(birthDAOs) > 0 {
 		ext.storage.SetBirth(birthDAOs)
+		println("Saved birth data for code", ext.code, "years count", len(birthDAOs))
 	}
 }

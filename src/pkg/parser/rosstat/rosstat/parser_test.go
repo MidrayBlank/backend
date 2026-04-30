@@ -21,13 +21,12 @@ func TestRosstatParserPopulation(t *testing.T) {
 	defer cancel()
 
 	code := subparser.NewCodeSubparser()
-	population := subparser.NewPopulationSubparser()
-
 	err := code.Parse(ctx, storage)
-
 	if err != nil {
-		t.Errorf("Error occured: %s", err.Error())
+		t.Errorf("Error occurred in code parser: %s", err.Error())
 	}
+
+	population := subparser.NewPopulationSubparser()
 
 	err = population.Parse(ctx, storage)
 	if err != nil {
@@ -66,13 +65,12 @@ func TestRosstatParserBirth(t *testing.T) {
 	defer cancel()
 
 	code := subparser.NewCodeSubparser()
-	birth := subparser.NewBirthSubparser()
-
 	err := code.Parse(ctx, storage)
 	if err != nil {
 		t.Errorf("Error occurred in code parser: %s", err.Error())
 	}
 
+	birth := subparser.NewBirthSubparser()
 	err = birth.Parse(ctx, storage)
 	if err != nil {
 		t.Errorf("Error occurred in birth parser: %s", err.Error())

@@ -17,9 +17,9 @@ func NewBirthSubparser() *BirthSubparser {
 	return &BirthSubparser{}
 }
 
-func (b *BirthSubparser) Parse(ctx context.Context, storage *storage.Storage) error {
+func (p *BirthSubparser) Parse(ctx context.Context, storage *storage.Storage) error {
 	config := config.NewConfig()
 	extractor := extractor.NewBirthExtractor(storage)
 
-	return b.baseParse(ctx, storage, config.GetBirthIndicator, extractor.Extract)
+	return p.baseParse(ctx, storage, config.GetBirthIndicator, extractor.Extract)
 }
