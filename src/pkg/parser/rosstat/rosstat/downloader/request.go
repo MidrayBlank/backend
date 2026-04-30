@@ -72,7 +72,7 @@ func NewRequestParameters(indicators []int, munr []int, oktmo []int, yearTo int)
 	}
 }
 
-func (p *RequestParameters) buildRequestBody() *strings.Reader {
+func (p *RequestParameters) buildRequestBodyStr() string {
 	qryRaw := fmt.Sprintf(
 		"Pokazateli:%s;munr:%s;tippos:%s;oktmo:%s;vozr:%d;grup_2:%s;god:%s;period:%d;mest:%s;",
 		joinInts(p.Qry.Pokazateli, ","),
@@ -108,7 +108,7 @@ func (p *RequestParameters) buildRequestBody() *strings.Reader {
 		yearsEncoded,
 		"%CF%EE%EA%E0%E7%E0%F2%FC+%F2%E0%E1%EB%E8%F6%F3",
 	)
-	return strings.NewReader(body)
+	return body
 }
 
 func joinInts(nums []int, sep string) string {

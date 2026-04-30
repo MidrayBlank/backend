@@ -32,29 +32,31 @@ func DownloadCSV(ctx context.Context, subjectCode int, indicator int, codes []in
 
 	url := fmt.Sprintf("https://rosstat.gov.ru/dbscripts/munst/munst%02d/DBInet.cgi", subjectCode)
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, params.buildRequestBody())
-	if err != nil {
-		return "", fmt.Errorf("error creating request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
-	req.Header.Set("Cache-Control", "max-age=0")
-	req.Header.Set("Referer", "https://rosstat.gov.ru/dbscripts/munst/munst87/DBInet.cgi")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36")
-
-	client := &http.Client{
-		Timeout: time.Duration(config.DownloadCSVTimeoutSeconds) * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
+	bodyStr := params.buildRequestBodyStr()
 	attempts := 0
 	var resp *http.Response
+	var err error
 
 	for attempts < config.DownloadCSVMaxAttempts {
+		req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(bodyStr))
+		if err != nil {
+			return "", fmt.Errorf("error creating request: %w", err)
+		}
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+		req.Header.Set("Cache-Control", "max-age=0")
+		req.Header.Set("Referer", "https://rosstat.gov.ru/dbscripts/munst/munst87/DBInet.cgi")
+		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36")
+
+		client := &http.Client{
+			Timeout: time.Duration(config.DownloadCSVTimeoutSeconds) * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+
 		resp, err = client.Do(req)
 		if err == nil {
 			break
@@ -104,26 +106,26 @@ func DownloadHTML(ctx context.Context, subjectCode int) (string, error) {
 
 	body := url.Values{}
 	body.Set("pl", strconv.Itoa(config.GetPopulationIndicator(subjectCode)))
-
-	req, err := http.NewRequestWithContext(ctx, "POST", urlStr, strings.NewReader(body.Encode()))
-	if err != nil {
-		return "", fmt.Errorf("error creating request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; OktmoGrabber/1.0)")
-
-	client := &http.Client{
-		Timeout: time.Duration(config.DownloadHTMLTimeoutSeconds) * time.Second,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
 	attempts := 0
 	var resp *http.Response
+	var err error
 
 	for attempts < config.DownloadHTMLMaxAttempts {
+		req, err := http.NewRequestWithContext(ctx, "POST", urlStr, strings.NewReader(body.Encode()))
+		if err != nil {
+			return "", fmt.Errorf("error creating request: %w", err)
+		}
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; OktmoGrabber/1.0)")
+
+		client := &http.Client{
+			Timeout: time.Duration(config.DownloadHTMLTimeoutSeconds) * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+
 		resp, err = client.Do(req)
 		if err == nil {
 			break

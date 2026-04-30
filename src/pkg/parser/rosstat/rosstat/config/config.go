@@ -39,7 +39,7 @@ func NewConfig() *Config {
 		DownloadHTMLTimeoutSeconds:   5,
 		DownloadHTMLBatchSize:        5,
 		DownloadHTMLTimeSleepSeconds: 2,
-		DownloadCSVMaxAttempts:       6,
+		DownloadCSVMaxAttempts:       8,
 		DownloadCSVTimeoutSeconds:    5,
 		DownloadCSVBatchSize:         5,
 		DownloadCSVTimeSleepSeconds:  3,
