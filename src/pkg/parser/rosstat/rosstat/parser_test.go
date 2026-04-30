@@ -40,7 +40,7 @@ func TestRosstatParserPopulation(t *testing.T) {
 
 	subjectCodesBool := make([]bool, 100)
 	for _, item := range result {
-		if item.ParentCode < 100 {
+		if item.ParentCode < 101 {
 			subjectCodesBool[item.ParentCode] = true
 		}
 
