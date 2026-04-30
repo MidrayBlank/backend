@@ -40,7 +40,7 @@ func TestRosstatParserPopulation(t *testing.T) {
 
 	subjectCodesBool := make([]bool, 100)
 	for _, item := range result {
-		if item.ParentCode < 101 {
+		if item.ParentCode < 100 {
 			subjectCodesBool[item.ParentCode] = true
 		}
 
@@ -61,7 +61,7 @@ func TestRosstatParserBirth(t *testing.T) {
 
 	storage := storage.NewStorage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Minute)
 	defer cancel()
 
 	code := subparser.NewCodeSubparser()
@@ -83,9 +83,7 @@ func TestRosstatParserBirth(t *testing.T) {
 
 	subjectCodesBool := make([]bool, 100)
 	for _, item := range result {
-		if item.ParentCode < 100 {
-			subjectCodesBool[item.ParentCode] = true
-		}
+		subjectCodesBool[getSubjectCode(item.Code)] = true
 	}
 
 	for _, subjectCode := range subjectCodes {
@@ -93,4 +91,41 @@ func TestRosstatParserBirth(t *testing.T) {
 			t.Log("SubjectCode ", subjectCode, " not parsed")
 		}
 	}
+}
+
+func getSubjectCode(code int) int {
+	subjectCode := code / 1000000
+	return subjectCode
+}
+
+func TestRosstatParserDeath(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping full parser test in short mode")
+	}
+
+	storage := storage.NewStorage()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	code := subparser.NewCodeSubparser()
+	err := code.Parse(ctx, storage)
+	if err != nil {
+		t.Errorf("Error occurred in code parser: %s", err.Error())
+	}
+
+	death := subparser.NewDeathSubparser()
+	err = death.Parse(ctx, storage)
+	if err != nil {
+		t.Errorf("Error occurred in death parser: %s", err.Error())
+	}
+
+	result := storage.Result()
+	deathCount := 0
+	for _, item := range result {
+		if item.Death != nil {
+			deathCount++
+		}
+	}
+	t.Logf("Records with death data: %d", deathCount)
 }

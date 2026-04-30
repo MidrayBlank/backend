@@ -9,8 +9,8 @@ import (
 	"backend/src/pkg/parser/rosstat/rosstat/storage"
 )
 
-type BirthExtractor struct {
-	BaseCSVExtractor[dao.BirthExtracted]
+type DeathExtractor struct {
+	BaseCSVExtractor[dao.DeathExtracted]
 
 	storage *storage.Storage
 
@@ -18,27 +18,27 @@ type BirthExtractor struct {
 	code  int
 }
 
-func NewBirthExtractor(storage *storage.Storage) *BirthExtractor {
-	return &BirthExtractor{storage: storage}
+func NewDeathExtractor(storage *storage.Storage) *DeathExtractor {
+	return &DeathExtractor{storage: storage}
 }
 
-func (ext *BirthExtractor) Extract(ctx context.Context, filePath string) error {
-	manager := state_manager.NewStateManager[dao.BirthExtracted](
-		state_manager.StateMapFuncType[dao.BirthExtracted]{
+func (ext *DeathExtractor) Extract(ctx context.Context, filePath string) error {
+	manager := state_manager.NewStateManager[dao.DeathExtracted](
+		state_manager.StateMapFuncType[dao.DeathExtracted]{
 			SKIP:              ext.skip,
 			GET_YEARS:         ext.getYears,
-			GET_NAME_OR_BIRTH: ext.getNameOrBirth,
+			GET_NAME_OR_DEATH: ext.getNameOrDeath,
 		},
 	)
 
 	return ext.ExtractRows(ctx, filePath, manager)
 }
 
-func (ext *BirthExtractor) skip(row []string, manager *state_manager.StateManager[dao.BirthExtracted]) {
+func (ext *DeathExtractor) skip(row []string, manager *state_manager.StateManager[dao.DeathExtracted]) {
 	manager.ChangeState(GET_YEARS)
 }
 
-func (ext *BirthExtractor) getYears(row []string, manager *state_manager.StateManager[dao.BirthExtracted]) {
+func (ext *DeathExtractor) getYears(row []string, manager *state_manager.StateManager[dao.DeathExtracted]) {
 	ext.years = make([]int, len(row)-1)
 
 	for i := 1; i < len(row); i++ {
@@ -51,18 +51,19 @@ func (ext *BirthExtractor) getYears(row []string, manager *state_manager.StateMa
 		}
 	}
 
-	manager.ChangeState(GET_NAME_OR_BIRTH)
+	manager.ChangeState(GET_NAME_OR_DEATH)
 }
 
-func (ext *BirthExtractor) getNameOrBirth(row []string, manager *state_manager.StateManager[dao.BirthExtracted]) {
+func (ext *DeathExtractor) getNameOrDeath(row []string, manager *state_manager.StateManager[dao.DeathExtracted]) {
 	if len(row) == 0 || row[0] == "" {
 		return
 	}
 
+	// Проверяем, является ли строка строкой с данными
 	if (row[0] == "Муниципальный район") || row[0] == "Муниципальный округ" ||
 		row[0] == "Городской округ, городской округ с внутригородским делением" ||
 		row[0] == "Городские поселения" || row[0] == "Сельские поселения" && len(row) > 1 && row[1] != "" {
-		ext.getBirth(row, manager)
+		ext.getDeath(row, manager)
 		return
 	}
 
@@ -72,24 +73,24 @@ func (ext *BirthExtractor) getNameOrBirth(row []string, manager *state_manager.S
 	}
 }
 
-func (ext *BirthExtractor) getBirth(row []string, manager *state_manager.StateManager[dao.BirthExtracted]) {
-	birthDAOs := make([]*dao.BirthExtracted, 0, len(ext.years))
+func (ext *DeathExtractor) getDeath(row []string, manager *state_manager.StateManager[dao.DeathExtracted]) {
+	deathDAOs := make([]*dao.DeathExtracted, 0, len(ext.years))
 
 	for i := 1; i < len(row) && i-1 < len(ext.years); i++ {
 		if row[i] == "" {
 			continue
 		}
-		birth, err := strconv.Atoi(row[i])
-		if err == nil && birth > 0 {
-			birthDAOs = append(birthDAOs, &dao.BirthExtracted{
+		death, err := strconv.Atoi(row[i])
+		if err == nil && death > 0 {
+			deathDAOs = append(deathDAOs, &dao.DeathExtracted{
 				Code:  ext.code,
 				Year:  ext.years[i-1],
-				Birth: birth,
+				Death: death,
 			})
 		}
 	}
 
-	if len(birthDAOs) > 0 {
-		ext.storage.SetBirth(birthDAOs)
+	if len(deathDAOs) > 0 {
+		ext.storage.SetDeath(deathDAOs)
 	}
 }

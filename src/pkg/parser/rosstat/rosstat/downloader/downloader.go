@@ -24,7 +24,7 @@ func DownloadCSV(ctx context.Context, subjectCode int, indicator int, codes []in
 	log.Printf("Downloading CSV: code=%d, indicator=%d\n", subjectCode, indicator)
 
 	params := NewRequestParameters(
-		[]int{indicator},
+		indicator,
 		getMunr(codes),
 		codes,
 		2026,

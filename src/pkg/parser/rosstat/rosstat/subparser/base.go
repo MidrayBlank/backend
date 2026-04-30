@@ -97,7 +97,7 @@ func (p *BaseSubparser[T]) parseByCode(
 	if err != nil {
 		return err
 	}
-	defer downloader.CleanupFile(fileName)
+	//defer downloader.CleanupFile(fileName)
 
 	err = extract(ctx, fileName)
 
