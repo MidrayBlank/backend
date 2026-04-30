@@ -19,7 +19,7 @@ type CreateReportResponse struct {
 
 type RequestStatusResponse struct {
 	Hash   string `json:"hash"`
-	Status string `json:"status"`
+	Status int    `json:"status"`
 	Error  string `json:"error,omitempty"`
 }
 

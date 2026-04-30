@@ -36,9 +36,9 @@ func GetReportAsyncHandler(ctx context.HandlerContext,
 	return buildAsyncReportResponse(ctx, report)
 }
 
-func buildAsyncReportResponse(ctx context.HandlerContext, report *domain.AiReport) dto.ReportResponse {
+func buildAsyncReportResponse(ctx context.HandlerContext, report *domain.AsyncRequest) dto.ReportResponse {
 	var content dto.AIReportContent
-	if err := json.Unmarshal([]byte(report.Report), &content); err != nil {
+	if err := json.Unmarshal([]byte(report.Result), &content); err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return dto.ReportResponse{}
 	}
@@ -83,4 +83,45 @@ func PutReportAsyncHandler(ctx context.HandlerContext,
 		Hash:    hash,
 		Message: "Запрос принят в работу",
 	}
+}
+
+func GetRequestStatusHandler(ctx context.HandlerContext,
+	aiReportAsyncService service.IAiReportAsyncService,
+) dto.RequestStatusResponse {
+	hash := ctx.Get("hash")
+	if hash == "" {
+		ctx.Status(http.StatusBadRequest)
+		return dto.RequestStatusResponse{
+			Hash:   "",
+			Status: 0,
+			Error:  "hash parameter is required",
+		}
+	}
+
+	request, err := aiReportAsyncService.GetRequestStatusByHash(hash)
+	if err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return dto.RequestStatusResponse{
+			Hash:   hash,
+			Status: 0,
+			Error:  err.Error(),
+		}
+	}
+
+	if request == nil {
+		ctx.Status(http.StatusBadRequest)
+		return dto.RequestStatusResponse{
+			Hash:   hash,
+			Status: 0,
+			Error:  "there are no requests with this hash",
+		}
+	}
+
+	ctx.Status(http.StatusOK)
+	return dto.RequestStatusResponse{
+		Hash:   request.Hash,
+		Status: request.Status,
+		Error:  request.Error,
+	}
+
 }
