@@ -16,6 +16,7 @@ type storageKey struct {
 type Storage struct {
 	mapper       map[storageKey]*domain.RosstatParsed
 	nameToCode   map[string]int
+	codeToName   map[int]string
 	subjectCodes [][]int
 	m            *sync.Mutex
 }
@@ -24,6 +25,7 @@ func NewStorage() *Storage {
 	return &Storage{
 		mapper:       make(map[storageKey]*domain.RosstatParsed),
 		nameToCode:   make(map[string]int),
+		codeToName:   make(map[int]string),
 		subjectCodes: make([][]int, 100),
 		m:            &sync.Mutex{},
 	}
@@ -38,11 +40,18 @@ func (s *Storage) getRosstatParsed(code int, year int) *domain.RosstatParsed {
 			Code:       code,
 			Year:       year,
 			ParentCode: s.getParentCode(code),
+			Name:       s.GetName(code),
 		}
 		s.mapper[key] = rosstatParsed
 	}
 
 	return rosstatParsed
+}
+
+func (s *Storage) GetName(code int) string {
+	s.m.Lock()
+	defer s.m.Unlock()
+	return s.codeToName[code]
 }
 
 func (s *Storage) SetCode(subjectCode int, extractedSlice []*dao.CodeExtracted) {
@@ -57,6 +66,7 @@ func (s *Storage) SetCode(subjectCode int, extractedSlice []*dao.CodeExtracted) 
 		}
 
 		s.nameToCode[name] = extracted.Code
+		s.codeToName[extracted.Code] = name
 		s.subjectCodes[subjectCode] = append(s.subjectCodes[subjectCode], extracted.Code)
 	}
 }

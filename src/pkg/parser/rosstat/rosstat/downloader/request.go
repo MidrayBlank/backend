@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"backend/src/pkg/parser/rosstat/rosstat/config"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -40,21 +41,22 @@ type RequestParameters struct {
 	YearsList []int
 }
 
-func NewRequestParameters(indicators []int, munr []int, oktmo []int, yearTo int) *RequestParameters {
+func NewRequestParameters(indicator int, munr []int, oktmo []int, yearTo int) *RequestParameters {
+	config := config.NewConfig()
 	years := generateYears(2000, yearTo)
 	return &RequestParameters{
 		Format:   "CSV",
 		YearFrom: 2000,
 		YearTo:   yearTo,
 		Qry: QueryDimensions{
-			Pokazateli: indicators,
+			Pokazateli: []int{indicator},
 			Munr:       munr,
 			Tippos:     []int{10, 7, 1, 4, 20},
 			Oktmo:      oktmo,
 			Vozr:       151,
 			Grup_2:     []int{1, 2, 3},
 			God:        years,
-			Period:     208,
+			Period:     config.GetPeriod(indicator),
 			Mest:       []int{11},
 		},
 		QryGm: QueryGm{

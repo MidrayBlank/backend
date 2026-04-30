@@ -75,7 +75,7 @@ func (p *CodeSubparser) parseByCode(ctx context.Context, storage *storage.Storag
 	if err != nil {
 		return err
 	}
-	defer downloader.CleanupFile(fileName)
+	//defer downloader.CleanupFile(fileName)
 
 	extractor := extractor.NewCodeExtractor()
 	codeExtracted, err := extractor.Extract(ctx, fileName)

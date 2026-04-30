@@ -38,6 +38,8 @@ const (
 	SKIP = iota
 	GET_YEARS
 	GET_NAME_OR_POPULATION
+	GET_NAME_OR_BIRTH
+	GET_NAME_OR_DEATH
 )
 
 func (ext *PopulationExtractor) skip(row []string, manager *state_manager.StateManager[dao.PopulationExtracted]) {

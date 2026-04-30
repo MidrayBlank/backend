@@ -8,6 +8,9 @@ type Config struct {
 	populationIndicator         int
 	populationIndicatorBuryatia int
 
+	birthIndicator int
+	deathIndicator int
+
 	SubjectCodes []int
 
 	DownloadHTMLMaxAttempts      int
@@ -25,6 +28,8 @@ func NewConfig() *Config {
 	return &Config{
 		populationIndicator:         8112027,
 		populationIndicatorBuryatia: 8312027,
+		birthIndicator:              8112003,
+		deathIndicator:              8112001,
 		SubjectCodes: []int{
 			1, 3, 4, 5, 7, 8, 10, 11, 12, 14, 15, 17, 18, 19, 20, 22, 24,
 			25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42,
@@ -37,7 +42,7 @@ func NewConfig() *Config {
 		DownloadHTMLBatchSize:        10,
 		DownloadHTMLTimeSleepSeconds: 2,
 		DownloadCSVMaxAttempts:       8,
-		DownloadCSVTimeoutSeconds:    5,
+		DownloadCSVTimeoutSeconds:    7,
 		DownloadCSVBatchSize:         10,
 		DownloadCSVTimeSleepSeconds:  2,
 	}
@@ -49,5 +54,34 @@ func (c *Config) GetPopulationIndicator(code int) int {
 		return c.populationIndicatorBuryatia
 	default:
 		return c.populationIndicator
+	}
+}
+
+func (c *Config) GetPeriod(indicator int) int {
+	switch indicator {
+	case c.birthIndicator:
+		return 17
+	case c.populationIndicator:
+		return 208
+	case c.populationIndicatorBuryatia:
+		return 208
+	case c.deathIndicator:
+		return 17
+	default:
+		return 208
+	}
+}
+
+func (c *Config) GetBirthIndicator(code int) int {
+	switch code {
+	default:
+		return c.birthIndicator
+	}
+}
+
+func (c *Config) GetDeathIndicator(code int) int {
+	switch code {
+	default:
+		return c.birthIndicator
 	}
 }
