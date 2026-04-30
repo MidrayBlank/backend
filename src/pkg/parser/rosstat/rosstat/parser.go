@@ -12,8 +12,8 @@ type RosstatParser struct {
 	code subparser.CodeSubparser
 
 	population subparser.PopulationSubparser
-	// birth               subparser.BirthSubparser
-	// death               subparser.DeathSubparser
+	birth      subparser.BirthSubparser
+	death      subparser.DeathSubparser
 	// arrival             subparser.ArrivalSubparser
 	// departure           subparser.DepartureSubparser
 	// maleFemaleAge       subparser.MaleFemaleAgeSubparser
@@ -41,6 +41,16 @@ func (p *RosstatParser) Parse(ctx context.Context) (domain.RosstatParsedSlice, e
 
 	err = p.population.Parse(ctx, p.storage)
 
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.birth.Parse(ctx, p.storage)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.death.Parse(ctx, p.storage)
 	if err != nil {
 		return nil, err
 	}
