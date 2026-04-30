@@ -55,21 +55,30 @@ func PutReportAsyncHandler(ctx context.HandlerContext,
 
 	if err := ctx.BindJSON(&request); err != nil {
 		ctx.Status(http.StatusBadRequest)
-		return dto.CreateReportResponse{}
+		return dto.CreateReportResponse{
+			Hash:    "",
+			Message: err.Error(),
+		}
 	}
 
 	if request.Code <= 0 {
 		ctx.Status(http.StatusBadRequest)
-		return dto.CreateReportResponse{}
+		return dto.CreateReportResponse{
+			Hash:    "",
+			Message: "code must be positive",
+		}
 	}
 
 	hash, err := aiReportAsyncService.CreateReportRequest(request.Code, request_type.AIREPORT)
 	if err != nil {
 		ctx.Status(http.StatusBadRequest)
-		return dto.CreateReportResponse{}
+		return dto.CreateReportResponse{
+			Hash:    "",
+			Message: err.Error(),
+		}
 	}
 
-	ctx.Status(204)
+	ctx.Status(http.StatusAccepted) // дада 202 а не 204 тк 204 это error
 	return dto.CreateReportResponse{
 		Hash:    hash,
 		Message: "Запрос принят в работу",
