@@ -69,7 +69,9 @@ func (ext *PopulationExtractor) getNameOrPopulation(row []string, manager *state
 func (ext *PopulationExtractor) getPopulation(row []string, manager *state_manager.StateManager[dao.PopulationExtracted]) {
 	populationDAOs := make([]*dao.PopulationExtracted, 0, len(ext.years)-1)
 
-	for i := 1; i < len(ext.years); i++ {
+	maxIndex := min(len(ext.years), len(row))
+
+	for i := 1; i < maxIndex; i++ {
 		population, err := strconv.Atoi(row[i])
 
 		if err == nil {

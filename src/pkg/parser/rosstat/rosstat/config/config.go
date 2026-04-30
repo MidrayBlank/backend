@@ -34,12 +34,12 @@ func NewConfig() *Config {
 		},
 		DownloadHTMLMaxAttempts:      6,
 		DownloadHTMLTimeoutSeconds:   5,
-		DownloadHTMLBatchSize:        5,
+		DownloadHTMLBatchSize:        10,
 		DownloadHTMLTimeSleepSeconds: 2,
 		DownloadCSVMaxAttempts:       8,
 		DownloadCSVTimeoutSeconds:    5,
-		DownloadCSVBatchSize:         5,
-		DownloadCSVTimeSleepSeconds:  3,
+		DownloadCSVBatchSize:         10,
+		DownloadCSVTimeSleepSeconds:  2,
 	}
 }
 
